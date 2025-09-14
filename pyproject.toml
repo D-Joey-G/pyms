@@ -20,7 +20,7 @@ dependencies = [
 packages = ["src/pyamlvus"]
 
 [project.scripts]
-milvus-yaml = "pyamlvus.cli:app"
+pyamlvus = "pyamlvus.cli:app"
 
 [tool.pytest.ini_options]
 minversion = "6.0"

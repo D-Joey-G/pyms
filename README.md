@@ -351,10 +351,10 @@ pyamlvus includes a command-line tool for schema validation and management:
 
 ```bash
 # Validate a schema file
-milvus-yaml validate my_schema.yaml
+pyamlvus validate my_schema.yaml
 
 # Convert YAML to CollectionSchema (future feature)
-milvus-yaml convert my_schema.yaml
+pyamlvus convert my_schema.yaml
 ```
 
 **Status**: **Core Library** - Focused on YAML schema definition, validation, and CollectionSchema building for PyMilvus integration.

@@ -15,7 +15,7 @@ from pyamlvus import SchemaLoader, validate_schema_file
 from pyamlvus.exceptions import SchemaParseError
 
 app = typer.Typer(
-    name="milvus-yaml",
+    name="pyamlvus",
     help="CLI tools for Milvus YAML schema management",
     add_completion=False,
 )
