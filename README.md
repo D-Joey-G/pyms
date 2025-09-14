@@ -323,3 +323,20 @@ milvus-yaml convert my_schema.yaml
 ```
 
 **Status**: **Core Library** - Focused on YAML schema definition, validation, and CollectionSchema building for PyMilvus integration.
+
+## Roadmap
+
+### **Phase 1: Declarative Schema Definition** (Completed)
+
+- [x] **YAML Parsing**: Load and parse schema files with error handling
+- [x] **Type System**: Complete mappings to PyMilvus data types
+- [x] **Exception Handling**: Structured error reporting
+- [x] **Schema Validation**: Field and schema-level validation rules
+- [x] **Schema Building**: Convert to PyMilvus CollectionSchema objects
+
+### **Phase 2: Version Management** (Future)
+
+- [ ] **Schema Diff**: Compare schema versions
+- [ ] **Migration Recommendations**: Suggest migration paths
+- [ ] **Backward Compatibility**: Check compatibility between versions
+- [ ] **Version History**: Track schema evolution
