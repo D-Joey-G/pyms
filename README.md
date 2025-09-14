@@ -310,6 +310,41 @@ This project is licensed under the Apache License 2.0 - see the LICENSE file for
 
 ---
 
+## IDE Support & Validation
+
+### JSON Schema for YAML Validation
+
+pyamlvus includes a JSON Schema file for IDE support and YAML validation. For VS Code, add the YAML extension from Red Hat, then add this to the top of your YAML schema files:
+
+```yaml
+# yaml-language-server: $schema=https://raw.githubusercontent.com/D-Joey-G/pyamlvus/main/schema/pyamlvus_schema.json
+
+name: "my_collection"
+fields:
+  # Your IDE will now provide autocompletion and validation!
+```
+
+Or configure your IDE to automatically validate `.yaml` files in your project using the schema at `schema/pyamlvus_schema.json`.
+
+**Benefits:**
+
+- **Autocompletion**: Field names, types, and parameters
+- **Validation**: Real-time error checking as you type
+- **Documentation**: Hover tooltips with field descriptions
+- **Type Safety**: Catch schema errors before runtime
+
+### VS Code Setup
+
+Add to your `.vscode/settings.json`:
+
+```json
+{
+  "yaml.schemas": {
+    "./schema/pyamlvus_schema.json": ["*_schema.yaml", "**/schemas/*.yaml"]
+  }
+}
+```
+
 ## CLI Tool
 
 pyamlvus includes a command-line tool for schema validation and management:
