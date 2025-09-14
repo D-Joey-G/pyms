@@ -1,6 +1,6 @@
-# Milvus YAML
+# pyamlvus
 
-A Python library for managing Milvus schemas through YAML configuration files. Define and validate your Milvus collection schemas using clean, declarative YAML syntax.
+A Python library for managing Milvus schemas through YAML configuration files.
 
 ## Quick Start
 
@@ -27,7 +27,7 @@ else:
 from pymilvus import MilvusClient
 
 # Connect to Milvus
-client = MilvusClient(uri="http://localhost:19530")
+client = MilvusClient(...)
 
 # Create collection using the loaded schema
 client.create_collection(
@@ -85,11 +85,10 @@ settings:
 
 ## Architecture
 
-```
 YAML Schema → Parser → Validation → CollectionSchema → Milvus
-```
 
 **Clean separation of concerns:**
+
 - **Parser**: YAML file loading with detailed error reporting
 - **Validator**: Schema validation with field-specific rules
 - **Builder**: CollectionSchema generation for PyMilvus
@@ -99,12 +98,12 @@ YAML Schema → Parser → Validation → CollectionSchema → Milvus
 
 ```bash
 # Install with uv (when published)
-uv add milvus-yaml
+uv add pyamlvus
 
 # Development installation
-git clone <repository>
-cd milvus-yaml
-uv sync --all-packages
+git clone https://github.com/D-Joey-G/pyamlvus
+cd pyamlvus
+uv sync --all-groups
 ```
 
 ## API Reference
@@ -112,6 +111,7 @@ uv sync --all-packages
 ### Core API
 
 **Load schema from YAML file:**
+
 ```python
 from pyamlvus import load_schema
 
@@ -119,6 +119,7 @@ schema = load_schema("schema.yaml")
 ```
 
 **Load schema dictionary:**
+
 ```python
 from pyamlvus import load_schema_dict
 
@@ -126,6 +127,7 @@ schema_dict = load_schema_dict("schema.yaml")
 ```
 
 **Validate schema file:**
+
 ```python
 from pyamlvus import validate_schema_file
 
@@ -161,7 +163,6 @@ collection_schema = builder.build()
 index_params = builder.get_milvus_index_params(client)
 ```
 
-
 ## Supported Field Types
 
 | YAML Type               | PyMilvus Type            | Required Parameters        |
@@ -177,11 +178,12 @@ index_params = builder.get_milvus_index_params(client)
 | `bfloat16_vector`      | `DataType.BFLOAT16_VECTOR`| `dim`                    |
 | `sparse_float_vector`  | `DataType.SPARSE_FLOAT_VECTOR` | None                |
 | `int8_vector`          | `DataType.INT8_VECTOR`   | `dim`                     |
-| `bool`                 | `DataType.BOOL`          | None
+| `bool`                 | `DataType.BOOL`          | None                      |
 
 ## Supported Index Types
 
 ### Vector Indexes
+
 - `FLAT`, `IVF_FLAT`, `IVF_SQ8`, `IVF_PQ`
 - `HNSW`, `DISKANN`, `AUTOINDEX`
 - `BIN_FLAT`, `BIN_IVF_FLAT` (for binary vectors)
@@ -189,6 +191,7 @@ index_params = builder.get_milvus_index_params(client)
 - GPU indexes: `GPU_IVF_FLAT`, `GPU_IVF_PQ`, `GPU_CAGRA`, `GPU_BRUTE_FORCE`
 
 ### Scalar Indexes
+
 - `TRIE` (for VARCHAR fields)
 - `INVERTED` (for text search)
 - `SORTED` (for numeric fields)
@@ -219,6 +222,7 @@ fields:
 ```
 
 Use in queries with `TEXT_MATCH` expressions:
+
 ```python
 # Search for documents containing specific keywords
 filter = "TEXT_MATCH(description, 'machine learning')"
@@ -245,23 +249,32 @@ Check out the `examples/` directory:
 - [`basic_schema.yaml`](examples/basic_schema.yaml) - Simple collection with ID, text, and vector
 - [`complex_schema.yaml`](examples/complex_schema.yaml) - Advanced features with arrays, indexes, and settings
 - [`text_match_example.yaml`](examples/text_match_example.yaml) - Text match functionality with keyword search
-- [`usage_examples.py`](examples/usage_examples.py) - Python code examples
+- [`usage_examples.py`](examples/usage_examples.py) - Comprehensive Python code examples
 
 ### Project Structure
-```
-milvus_schema/
+
+```text
+src/pyamlvus/
 ├── __init__.py          # Public API exports
+├── api.py               # High-level convenience functions
 ├── parser.py            # YAML parsing and loading
-├── validator.py         # Schema validation logic
-├── builder.py           # CollectionSchema building
-├── types.py             # Type mappings and constants
-└── exceptions.py        # Custom exception hierarchy
+├── exceptions.py        # Custom exception hierarchy
+├── builders/
+│   ├── schema.py        # CollectionSchema building
+│   ├── field.py         # Field building
+│   ├── index.py         # Index building
+│   └── function.py      # Function building
+├── types/
+│   ├── constants.py     # Type and constant definitions
+│   └── mappings.py      # Type mappings to PyMilvus
+└── validators/          # Schema validation modules
 tests/
 ├── test_parser.py       # Parser tests
-├── test_validator.py    # Validation tests
 ├── test_builder.py      # Builder tests
+├── test_integration.py  # End-to-end tests
 └── fixtures/            # Test YAML files
 ```
+
 ## Features
 
 - **YAML Schema Definition**: Define Milvus collection schemas using clean, declarative YAML syntax
@@ -272,6 +285,7 @@ tests/
 - **Text Match Support**: Enable keyword matching on VARCHAR fields for precise text retrieval
 
 ### Development Standards
+
 - **Code Quality**: All code must pass `ruff` formatting and linting
 - **Type Safety**: Use modern Python type hints throughout
 - **Testing**: Write tests for new features
@@ -289,11 +303,23 @@ This project is licensed under the Apache License 2.0 - see the LICENSE file for
 
 ## Support
 
--  **Documentation**: Check our examples and API reference above
--  **Bug Reports**: Open an issue on GitHub
--  **Feature Requests**: We'd love to hear your ideas!
--  **Questions**: Start a discussion in our GitHub discussions
+- **Documentation**: Check our examples and API reference above
+- **Bug Reports**: Open an issue on GitHub
+- **Feature Requests**: We'd love to hear your ideas!
+- **Questions**: Start a discussion in our GitHub discussions
 
 ---
+
+## CLI Tool
+
+pyamlvus includes a command-line tool for schema validation and management:
+
+```bash
+# Validate a schema file
+milvus-yaml validate my_schema.yaml
+
+# Convert YAML to CollectionSchema (future feature)
+milvus-yaml convert my_schema.yaml
+```
 
 **Status**: **Core Library** - Focused on YAML schema definition, validation, and CollectionSchema building for PyMilvus integration.
