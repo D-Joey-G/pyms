@@ -1,0 +1,54 @@
+# Example schema demonstrating text match functionality
+name: "document_search"
+alias: "docs"
+description: "Document search collection with text match capabilities"
+
+fields:
+  - name: "id"
+    type: "int64"
+    is_primary: true
+    auto_id: false
+
+  - name: "title"
+    type: "varchar"
+    max_length: 512
+    enable_analyzer: true
+    enable_match: true
+    analyzer_params:
+      type: "english"
+
+  - name: "content"
+    type: "varchar"
+    max_length: 8192
+    enable_analyzer: true
+    enable_match: true
+    analyzer_params:
+      type: "english"
+
+  - name: "tags"
+    type: "varchar"
+    max_length: 256
+    enable_analyzer: true
+    enable_match: true
+
+  - name: "embedding"
+    type: "float_vector"
+    dim: 768
+
+indexes:
+  - field: "embedding"
+    type: "IVF_FLAT"
+    metric: "L2"
+    params:
+      nlist: 1024
+
+  - field: "title"
+    type: "TRIE"
+
+  - field: "tags"
+    type: "TRIE"
+
+settings:
+  consistency_level: "Strong"
+  ttl_seconds: 3600
+  enable_dynamic_field: true

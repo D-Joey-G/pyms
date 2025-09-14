@@ -1,0 +1,57 @@
+# Complex Milvus schema example with indexes and advanced features
+name: "user_collection"
+alias: "user_data"
+description: "User profile collection with embeddings and metadata"
+
+fields:
+  - name: "id"
+    type: "int64"
+    is_primary: true
+    auto_id: false
+
+  - name: "username"
+    type: "varchar"
+    max_length: 100
+
+  - name: "embedding"
+    type: "float_vector"
+    dim: 768
+
+  - name: "metadata"
+    type: "json"
+
+  - name: "text"
+    type: "varchar"
+    max_length: 1000
+    enable_analyzer: true
+    enable_match: true
+
+  - name: "text_sparse_vector"
+    type: "sparse_float_vector"
+
+  - name: "tags"
+    type: "array"
+    element_type: "varchar"
+    max_capacity: 50
+    max_length: 20
+
+indexes:
+  - field: "embedding"
+    type: "IVF_FLAT"
+    metric: "L2"
+    params:
+      nlist: 1024
+
+  - field: "username"
+    type: "TRIE"
+
+settings:
+  consistency_level: "Strong"
+  ttl_seconds: 3600
+  enable_dynamic_field: true
+
+functions:
+  - name: "text_bm25"
+    type: "BM25"
+    input_field: "text"
+    output_field: "text_sparse_vector"

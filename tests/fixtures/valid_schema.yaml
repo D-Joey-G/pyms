@@ -1,0 +1,17 @@
+# Valid schema for testing
+name: "test_collection"
+description: "Test collection schema"
+
+fields:
+  - name: "id"
+    type: "int64"
+    is_primary: true
+    auto_id: false
+    
+  - name: "text"
+    type: "varchar"
+    max_length: 256
+    
+  - name: "vector"
+    type: "float_vector"
+    dim: 128

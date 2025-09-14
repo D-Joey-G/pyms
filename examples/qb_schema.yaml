@@ -1,0 +1,52 @@
+name: "qb"
+autoindex: true
+
+fields:
+  - name: "id"
+    type: "int64"
+    is_primary: true
+    auto_id: true
+
+  - name: "question"
+    type: "varchar"
+    max_length: 1000
+    enable_analyzer: true  # For full-text search
+
+  - name: "answer"
+    type: "varchar"
+    max_length: 300
+
+  - name: "question_search"
+    type: "sparse_float_vector"
+
+  - name: "year"
+    type: "int16"
+
+  - name: "is_tossup"
+    type: "bool"
+
+  - name: "tournament"
+    type: "varchar"
+    max_length: 50
+
+  - name: "category"
+    type: "varchar"
+    max_length: 25
+
+  - name: "difficulty"
+    type: "int8"
+
+  - name: "bonus_id"
+    type: "varchar"
+    max_length: 36
+    nullable: true
+
+indexes:
+  - field: "question_search"  # Will become SPARSE_INVERTED_INDEX (sparse vector)
+
+# Full-text search function
+functions:
+  - name: "text_bm25_emb"
+    type: "BM25"
+    input_field_names: ["question"]
+    output_field_names: ["question_search"]

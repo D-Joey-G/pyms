@@ -1,0 +1,21 @@
+# Basic Milvus schema example
+name: "basic_collection"
+alias: "user_profiles"
+description: "A simple user collection"
+
+fields:
+  - name: "id"
+    type: "int64"
+    is_primary: true
+    auto_id: false
+
+  - name: "username"
+    type: "varchar"
+    max_length: 100
+
+  - name: "embedding"
+    type: "float_vector"
+    dim: 768
+
+settings:
+  consistency_level: "Strong"

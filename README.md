@@ -1,0 +1,299 @@
+# Milvus YAML
+
+A Python library for managing Milvus schemas through YAML configuration files. Define and validate your Milvus collection schemas using clean, declarative YAML syntax.
+
+## Quick Start
+
+**Load and validate schemas from YAML:**
+
+```python
+from pyamlvus import load_schema, validate_schema_file
+
+# Load schema from YAML file
+schema = load_schema("my_schema.yaml")
+
+# Validate schema file
+errors = validate_schema_file("my_schema.yaml")
+if errors:
+    for error in errors:
+        print(f"Validation error: {error}")
+else:
+    print("Schema is valid!")
+```
+
+**Use with PyMilvus:**
+
+```python
+from pymilvus import MilvusClient
+
+# Connect to Milvus
+client = MilvusClient(uri="http://localhost:19530")
+
+# Create collection using the loaded schema
+client.create_collection(
+    collection_name="my_collection",
+    schema=schema
+)
+```
+
+## YAML Schema Format
+
+```yaml
+name: "user_collection"
+description: "User profile collection with embeddings"
+
+fields:
+  - name: "id"
+    type: "int64"
+    is_primary: true
+    auto_id: false
+
+   - name: "username"
+     type: "varchar"
+     max_length: 100
+
+   - name: "description"
+     type: "varchar"
+     max_length: 1000
+     enable_analyzer: true
+     enable_match: true
+     analyzer_params:
+       type: "english"
+
+  - name: "embedding"
+    type: "float_vector"
+    dim: 768
+
+  - name: "metadata"
+    type: "json"
+
+indexes:
+  - field: "embedding"
+    type: "IVF_FLAT"
+    metric: "L2"
+    params:
+      nlist: 1024
+
+  - field: "username"
+    type: "TRIE"
+
+settings:
+  consistency_level: "Strong"
+  ttl_seconds: 3600
+  enable_dynamic_field: true
+```
+
+## Architecture
+
+```
+YAML Schema → Parser → Validation → CollectionSchema → Milvus
+```
+
+**Clean separation of concerns:**
+- **Parser**: YAML file loading with detailed error reporting
+- **Validator**: Schema validation with field-specific rules
+- **Builder**: CollectionSchema generation for PyMilvus
+- **Types**: Comprehensive mappings to PyMilvus data types
+
+## Installation
+
+```bash
+# Install with uv (when published)
+uv add milvus-yaml
+
+# Development installation
+git clone <repository>
+cd milvus-yaml
+uv sync --all-packages
+```
+
+## API Reference
+
+### Core API
+
+**Load schema from YAML file:**
+```python
+from pyamlvus import load_schema
+
+schema = load_schema("schema.yaml")
+```
+
+**Load schema dictionary:**
+```python
+from pyamlvus import load_schema_dict
+
+schema_dict = load_schema_dict("schema.yaml")
+```
+
+**Validate schema file:**
+```python
+from pyamlvus import validate_schema_file
+
+errors = validate_schema_file("schema.yaml")
+if errors:
+    for error in errors:
+        print(f"Error: {error}")
+```
+
+### Schema Loading & Parsing
+
+```python
+from pyamlvus import SchemaLoader
+
+loader = SchemaLoader("schema.yaml")
+print(f"Collection: {loader.name}")
+print(f"Fields: {len(loader.fields)}")
+print(f"Indexes: {len(loader.indexes)}")
+
+# Access parsed schema
+schema_dict = loader.to_dict()
+```
+
+### Schema Building
+
+```python
+from pyamlvus import SchemaBuilder
+
+builder = SchemaBuilder(schema_dict)
+collection_schema = builder.build()
+
+# Advanced: Get index parameters for MilvusClient
+index_params = builder.get_milvus_index_params(client)
+```
+
+
+## Supported Field Types
+
+| YAML Type               | PyMilvus Type            | Required Parameters        |
+|------------------------|---------------------------|---------------------------|
+| `int8`, `int16`, `int32`, `int64` | `DataType.INT*`    | None                      |
+| `float`, `double`       | `DataType.FLOAT/DOUBLE`  | None                      |
+| `varchar`              | `DataType.VARCHAR`       | `max_length`              |
+| `json`                 | `DataType.JSON`          | None                      |
+| `array`                | `DataType.ARRAY`         | `element_type`, `max_capacity` |
+| `float_vector`         | `DataType.FLOAT_VECTOR`  | `dim`                     |
+| `binary_vector`        | `DataType.BINARY_VECTOR` | `dim`                     |
+| `float16_vector`       | `DataType.FLOAT16_VECTOR`| `dim`                     |
+| `bfloat16_vector`      | `DataType.BFLOAT16_VECTOR`| `dim`                    |
+| `sparse_float_vector`  | `DataType.SPARSE_FLOAT_VECTOR` | None                |
+| `int8_vector`          | `DataType.INT8_VECTOR`   | `dim`                     |
+| `bool`                 | `DataType.BOOL`          | None
+
+## Supported Index Types
+
+### Vector Indexes
+- `FLAT`, `IVF_FLAT`, `IVF_SQ8`, `IVF_PQ`
+- `HNSW`, `DISKANN`, `AUTOINDEX`
+- `BIN_FLAT`, `BIN_IVF_FLAT` (for binary vectors)
+- `SPARSE_INVERTED_INDEX` (for sparse vectors)
+- GPU indexes: `GPU_IVF_FLAT`, `GPU_IVF_PQ`, `GPU_CAGRA`, `GPU_BRUTE_FORCE`
+
+### Scalar Indexes
+- `TRIE` (for VARCHAR fields)
+- `INVERTED` (for text search)
+- `SORTED` (for numeric fields)
+
+## Supported Metrics
+
+- `L2` - Euclidean distance
+- `IP` - Inner product
+- `COSINE` - Cosine similarity
+- `HAMMING` - Hamming distance (binary vectors)
+- `JACCARD` - Jaccard distance (binary vectors)
+- `TANIMOTO` - Tanimoto distance (binary vectors)
+- `BM25` - BM25 scoring (sparse vectors)
+
+## Text Match Support
+
+Enable keyword matching on VARCHAR fields for precise text retrieval:
+
+```yaml
+fields:
+  - name: "description"
+    type: "varchar"
+    max_length: 1000
+    enable_analyzer: true      # Required for text analysis
+    enable_match: true         # Enable TEXT_MATCH expressions
+    analyzer_params:
+      type: "english"          # Optional: specify analyzer
+```
+
+Use in queries with `TEXT_MATCH` expressions:
+```python
+# Search for documents containing specific keywords
+filter = "TEXT_MATCH(description, 'machine learning')"
+results = client.search(
+    collection_name="my_collection",
+    filter=filter,
+    # ... other search parameters
+)
+```
+
+## Collection Settings
+
+```yaml
+settings:
+  consistency_level: "Strong"     # Strong, Session, Bounded, Eventually
+  ttl_seconds: 3600              # Time-to-live in seconds
+  enable_dynamic_field: true     # Allow dynamic fields
+```
+
+## Examples
+
+Check out the `examples/` directory:
+
+- [`basic_schema.yaml`](examples/basic_schema.yaml) - Simple collection with ID, text, and vector
+- [`complex_schema.yaml`](examples/complex_schema.yaml) - Advanced features with arrays, indexes, and settings
+- [`text_match_example.yaml`](examples/text_match_example.yaml) - Text match functionality with keyword search
+- [`usage_examples.py`](examples/usage_examples.py) - Python code examples
+
+### Project Structure
+```
+milvus_schema/
+├── __init__.py          # Public API exports
+├── parser.py            # YAML parsing and loading
+├── validator.py         # Schema validation logic
+├── builder.py           # CollectionSchema building
+├── types.py             # Type mappings and constants
+└── exceptions.py        # Custom exception hierarchy
+tests/
+├── test_parser.py       # Parser tests
+├── test_validator.py    # Validation tests
+├── test_builder.py      # Builder tests
+└── fixtures/            # Test YAML files
+```
+## Features
+
+- **YAML Schema Definition**: Define Milvus collection schemas using clean, declarative YAML syntax
+- **Comprehensive Validation**: Validate schemas with detailed error messages and warnings
+- **Type Safety**: Full type mappings to PyMilvus data types with parameter validation
+- **Schema Building**: Convert YAML schemas to PyMilvus CollectionSchema objects
+- **Error Handling**: Structured exceptions with helpful error messages
+- **Text Match Support**: Enable keyword matching on VARCHAR fields for precise text retrieval
+
+### Development Standards
+- **Code Quality**: All code must pass `ruff` formatting and linting
+- **Type Safety**: Use modern Python type hints throughout
+- **Testing**: Write tests for new features
+- **Documentation**: Update docstrings and examples
+
+## License
+
+This project is licensed under the Apache License 2.0 - see the LICENSE file for details.
+
+## Acknowledgments
+
+- Built on top of [PyMilvus](https://github.com/milvus-io/pymilvus) - the official Milvus Python SDK
+- Inspired by the need for declarative schema management in vector databases
+- Type mappings and constants sourced directly from PyMilvus codebase for accuracy
+
+## Support
+
+-  **Documentation**: Check our examples and API reference above
+-  **Bug Reports**: Open an issue on GitHub
+-  **Feature Requests**: We'd love to hear your ideas!
+-  **Questions**: Start a discussion in our GitHub discussions
+
+---
+
+**Status**: **Core Library** - Focused on YAML schema definition, validation, and CollectionSchema building for PyMilvus integration.

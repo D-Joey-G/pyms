@@ -1,0 +1,25 @@
+# Schema demonstrating autoindex functionality
+name: "autoindex_test_collection"
+description: "Test collection with autoindex enabled"
+
+# Enable automatic index type selection
+autoindex: true
+
+fields:
+  - name: "id"
+    type: "int64"
+    is_primary: true
+    auto_id: false
+
+  - name: "text"
+    type: "varchar"
+    max_length: 256
+
+  - name: "vector"
+    type: "float_vector"
+    dim: 128
+
+# Indexes without explicit types - will use AUTOINDEX when autoindex is enabled
+indexes:
+  - field: "vector"  # Will become AUTOINDEX
+  - field: "text"    # Will become AUTOINDEX

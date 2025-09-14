@@ -1,0 +1,43 @@
+# Example schema demonstrating autoindex functionality
+name: "product_search"
+alias: "products"
+description: "Product search collection with automatic index selection"
+
+# Enable automatic index type selection
+autoindex: true
+
+fields:
+  - name: "id"
+    type: "int64"
+    is_primary: true
+    auto_id: false
+
+  - name: "title"
+    type: "varchar"
+    max_length: 512
+
+  - name: "description"
+    type: "varchar"
+    max_length: 2048
+    enable_analyzer: true # For full-text search
+    enable_match: true # For keyword matching
+
+  - name: "embedding"
+    type: "float_vector"
+    dim: 768
+
+  - name: "sparse_embedding"
+    type: "sparse_float_vector"
+
+# Indexes without explicit types - will use AUTOINDEX when enabled
+indexes:
+  - field: "embedding" # Will become AUTOINDEX (dense vector)
+  - field: "sparse_embedding" # Will become SPARSE_INVERTED_INDEX (sparse vector)
+  - field: "title" # Will become AUTOINDEX (varchar)
+
+# Full-text search function
+functions:
+  - name: "text_bm25_emb"
+    type: "BM25"
+    input_field_names: ["description"]
+    output_field_names: ["sparse_embedding"]

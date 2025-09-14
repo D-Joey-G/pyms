@@ -1,0 +1,10 @@
+# Invalid schema for testing error handling
+name: "invalid_collection"
+
+fields:
+  - name: "id"
+    type: "invalid_type"  # Invalid type
+    
+  - name: "vector"
+    type: "float_vector"
+    # Missing required dim parameter
