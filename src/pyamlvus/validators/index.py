@@ -8,6 +8,11 @@ from ..types import (
     BINARY_METRICS,
     FLOAT_METRICS,
     GPU_INDEX_TYPES,
+    OPTIONAL_INDEX_REQUIREMENTS,
+    OPTIONAL_INDEX_SUPPORT,
+    OPTIONAL_TYPE_REQUIREMENTS,
+    OPTIONAL_TYPE_SUPPORT,
+    PYMILVUS_VERSION,
     RECOMMENDED_INDEX_TYPES,
     REQUIRED_PARAMS,
     VALID_INDEX_TYPES,
@@ -79,10 +84,27 @@ class IndexValidator(BaseValidator):
         Raises:
             SchemaConversionError: If index type is not valid for field type
         """
+        # If the field type itself is optional and unsupported, surface the field error.
+        if (
+            field_type in OPTIONAL_TYPE_SUPPORT
+            and not OPTIONAL_TYPE_SUPPORT[field_type]
+        ):
+            req = OPTIONAL_TYPE_REQUIREMENTS[field_type]
+            raise SchemaConversionError(
+                f"Field type '{field_type}' requires additional support ({req})."
+            )
+
         valid_types = VALID_INDEX_TYPES.get(field_type, set())
 
         # Normalize to uppercase for case-insensitive comparison
         index_type_upper = index_type.upper()
+
+        req = OPTIONAL_INDEX_REQUIREMENTS.get(index_type_upper)
+        if req and not OPTIONAL_INDEX_SUPPORT.get(index_type_upper, False):
+            raise SchemaConversionError(
+                f"Index type '{index_type}' requires additional support "
+                f"({req}). Current pymilvus version: {PYMILVUS_VERSION}."
+            )
 
         # Check if type is valid (case-insensitive)
         if index_type_upper not in valid_types:

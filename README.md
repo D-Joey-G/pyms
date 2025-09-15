@@ -174,10 +174,10 @@ index_params = builder.get_milvus_index_params(client)
 | `array`                | `DataType.ARRAY`         | `element_type`, `max_capacity` |
 | `float_vector`         | `DataType.FLOAT_VECTOR`  | `dim`                     |
 | `binary_vector`        | `DataType.BINARY_VECTOR` | `dim`                     |
-| `float16_vector`       | `DataType.FLOAT16_VECTOR`| `dim`                     |
-| `bfloat16_vector`      | `DataType.BFLOAT16_VECTOR`| `dim`                    |
+| `float16_vector`       | `DataType.FLOAT16_VECTOR`| `dim` *(requires pymilvus ≥ 2.6)* |
+| `bfloat16_vector`      | `DataType.BFLOAT16_VECTOR`| `dim` *(requires pymilvus ≥ 2.6)* |
 | `sparse_float_vector`  | `DataType.SPARSE_FLOAT_VECTOR` | None                |
-| `int8_vector`          | `DataType.INT8_VECTOR`   | `dim`                     |
+| `int8_vector`          | `DataType.INT8_VECTOR`   | `dim` *(requires pymilvus ≥ 2.6)* |
 | `bool`                 | `DataType.BOOL`          | None                      |
 
 ## Supported Index Types
@@ -190,6 +190,7 @@ index_params = builder.get_milvus_index_params(client)
 - `SPARSE_INVERTED_INDEX` (for sparse vectors)
 - GPU indexes: `GPU_IVF_FLAT`, `GPU_IVF_PQ`, `GPU_CAGRA`, `GPU_BRUTE_FORCE`
   - `GPU_*` indexes do not support the `COSINE` metric. Normalize vectors and use `IP` if cosine similarity is required.
+  - `GPU_CAGRA` and `GPU_BRUTE_FORCE` require pymilvus ≥ 2.6.
   - `int8_vector` fields currently support only the `HNSW` index type.
 
 ### Scalar Indexes

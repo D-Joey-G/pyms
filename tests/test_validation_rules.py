@@ -60,6 +60,23 @@ class TestFieldParameterValidation:
         with pytest.raises(SchemaConversionError, match="missing required 'dim'"):
             builder.build()
 
+    def test_float16_vector_requires_newer_pymilvus(self, monkeypatch):
+        from pyamlvus import types
+
+        monkeypatch.setitem(types.OPTIONAL_TYPE_SUPPORT, "float16_vector", False)
+
+        schema_dict = create_schema_dict(
+            "float16_requires_upgrade",
+            [
+                {"name": "id", "type": "int64", "is_primary": True},
+                {"name": "vec", "type": "float16_vector", "dim": 128},
+            ],
+        )
+
+        builder = SchemaBuilder(schema_dict)
+        with pytest.raises(SchemaConversionError, match="Requires pymilvus>=2.6.0"):
+            builder.build()
+
 
 @pytest.mark.unit
 class TestIndexValidation:
@@ -117,6 +134,23 @@ class TestIndexValidation:
         with pytest.raises(
             SchemaConversionError, match="COSINE' is not supported for GPU index"
         ):
+            builder.get_create_index_calls()
+
+    def test_gpu_cagra_requires_newer_pymilvus(self, monkeypatch):
+        from pyamlvus import types
+
+        monkeypatch.setitem(types.OPTIONAL_INDEX_SUPPORT, "GPU_CAGRA", False)
+
+        schema_dict = create_schema_dict(
+            "gpu_cagra_requires_upgrade",
+            [
+                {"name": "id", "type": "int64", "is_primary": True},
+                {"name": "vec", "type": "float_vector", "dim": 128},
+            ],
+            indexes=[{"field": "vec", "type": "GPU_CAGRA", "metric": "L2"}],
+        )
+        builder = SchemaBuilder(schema_dict)
+        with pytest.raises(SchemaConversionError, match="Requires pymilvus>=2.6.0"):
             builder.get_create_index_calls()
 
     def test_int8_vector_allows_only_hnsw(self):

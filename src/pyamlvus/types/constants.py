@@ -1,6 +1,11 @@
 # Constants for pyamlvus
 # Contains validation constants, index types, and metric definitions
 
+from .compat import (
+    OPTIONAL_INDEX_SUPPORT,
+    OPTIONAL_TYPE_SUPPORT,
+)
+
 # Minimal metric compatibility set for vector types
 FLOAT_METRICS = {"L2", "IP", "COSINE"}
 BINARY_METRICS = {"HAMMING", "JACCARD", "TANIMOTO"}
@@ -15,52 +20,32 @@ REQUIRED_PARAMS = {
 }
 
 # Valid index types by field type (case-insensitive input, normalized to uppercase)
+_BASE_VECTOR_INDEXES = {
+    "FLAT",
+    "IVF_FLAT",
+    "IVF_SQ8",
+    "IVF_PQ",
+    "IVF_RABITQ",
+    "HNSW",
+    "DISKANN",
+    "AUTOINDEX",
+    "GPU_IVF_FLAT",
+    "GPU_IVF_PQ",
+}
+
+_BASE_GPU_INDEXES = {"GPU_IVF_FLAT", "GPU_IVF_PQ"}
+_OPTIONAL_GPU_INDEXES = {
+    index for index, supported in OPTIONAL_INDEX_SUPPORT.items() if supported
+}
+
+_ALL_GPU_INDEXES = _BASE_GPU_INDEXES | _OPTIONAL_GPU_INDEXES
+
+_FLOAT_VECTOR_INDEXES = _BASE_VECTOR_INDEXES | _OPTIONAL_GPU_INDEXES
+
 VALID_INDEX_TYPES = {
-    "float_vector": {
-        "FLAT",
-        "IVF_FLAT",
-        "IVF_SQ8",
-        "IVF_PQ",
-        "IVF_RABITQ",
-        "HNSW",
-        "DISKANN",
-        "AUTOINDEX",
-        "GPU_IVF_FLAT",
-        "GPU_IVF_PQ",
-        "GPU_CAGRA",
-        "GPU_BRUTE_FORCE",
-    },
-    "float16_vector": {
-        "FLAT",
-        "IVF_FLAT",
-        "IVF_SQ8",
-        "IVF_PQ",
-        "IVF_RABITQ",
-        "HNSW",
-        "DISKANN",
-        "AUTOINDEX",
-        "GPU_IVF_FLAT",
-        "GPU_IVF_PQ",
-        "GPU_CAGRA",
-        "GPU_BRUTE_FORCE",
-    },
-    "bfloat16_vector": {
-        "FLAT",
-        "IVF_FLAT",
-        "IVF_SQ8",
-        "IVF_PQ",
-        "IVF_RABITQ",
-        "HNSW",
-        "DISKANN",
-        "AUTOINDEX",
-        "GPU_IVF_FLAT",
-        "GPU_IVF_PQ",
-        "GPU_CAGRA",
-        "GPU_BRUTE_FORCE",
-    },
+    "float_vector": set(_FLOAT_VECTOR_INDEXES),
     "binary_vector": {"BIN_FLAT", "BIN_IVF_FLAT", "MINHASH_LSH"},
     "sparse_float_vector": {"SPARSE_INVERTED_INDEX"},
-    "int8_vector": {"HNSW"},
     "varchar": {"INVERTED", "BITMAP", "TRIE"},
     "int8": {"INVERTED", "STL_SORT"},
     "int16": {"INVERTED", "STL_SORT"},
@@ -72,6 +57,15 @@ VALID_INDEX_TYPES = {
     "array": {"BITMAP", "INVERTED"},  # Depends on element type
     "json": {"INVERTED"},
 }
+
+if OPTIONAL_TYPE_SUPPORT.get("float16_vector"):
+    VALID_INDEX_TYPES["float16_vector"] = set(_FLOAT_VECTOR_INDEXES)
+
+if OPTIONAL_TYPE_SUPPORT.get("bfloat16_vector"):
+    VALID_INDEX_TYPES["bfloat16_vector"] = set(_FLOAT_VECTOR_INDEXES)
+
+if OPTIONAL_TYPE_SUPPORT.get("int8_vector"):
+    VALID_INDEX_TYPES["int8_vector"] = {"HNSW"}
 
 # Recommended index types for each field type
 RECOMMENDED_INDEX_TYPES = {
@@ -85,12 +79,9 @@ RECOMMENDED_INDEX_TYPES = {
     "double": "INVERTED",
     "array": "BITMAP",
     "json": "INVERTED",
-    "int8_vector": "HNSW",
 }
 
-GPU_INDEX_TYPES = {
-    "GPU_IVF_FLAT",
-    "GPU_IVF_PQ",
-    "GPU_CAGRA",
-    "GPU_BRUTE_FORCE",
-}
+if OPTIONAL_TYPE_SUPPORT.get("int8_vector"):
+    RECOMMENDED_INDEX_TYPES["int8_vector"] = "HNSW"
+
+GPU_INDEX_TYPES = set(_ALL_GPU_INDEXES)

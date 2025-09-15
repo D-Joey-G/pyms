@@ -7,10 +7,10 @@ name = "pyamlvus"
 version = "0.1.0"
 description = "Declarative Milvus schemas in YAML"
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.10"
 dependencies = [
-    "pydantic>=2.11.7",
-    "pymilvus>=2.6.0",
+    "pydantic>=2.5.0",
+    "pymilvus>=2.5.0",
     "pyyaml>=6.0.2",
     "rich>=14.1.0",
     "typer>=0.17.3",
@@ -32,6 +32,9 @@ classifiers = [
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3 :: Only",
     "Topic :: Database",
@@ -117,7 +120,7 @@ indent-width = 4
 src = ["src", "packages", "apps"]
 
 
-target-version = "py313"
+target-version = "py310"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "C4",]

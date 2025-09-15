@@ -1,6 +1,13 @@
 # Type system module for pyamlvus
 # Provides type mappings, constants, and type-related utilities
 
+from .compat import (
+    OPTIONAL_INDEX_REQUIREMENTS,
+    OPTIONAL_INDEX_SUPPORT,
+    OPTIONAL_TYPE_REQUIREMENTS,
+    OPTIONAL_TYPE_SUPPORT,
+    PYMILVUS_VERSION,
+)
 from .constants import (
     BINARY_METRICS,
     FLOAT_METRICS,
@@ -19,4 +26,9 @@ __all__ = [
     "VALID_INDEX_TYPES",
     "RECOMMENDED_INDEX_TYPES",
     "GPU_INDEX_TYPES",
+    "OPTIONAL_TYPE_SUPPORT",
+    "OPTIONAL_TYPE_REQUIREMENTS",
+    "OPTIONAL_INDEX_SUPPORT",
+    "OPTIONAL_INDEX_REQUIREMENTS",
+    "PYMILVUS_VERSION",
 ]

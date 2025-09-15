@@ -4,7 +4,12 @@
 from typing import Any
 
 from ..exceptions import SchemaConversionError, UnsupportedTypeError
-from ..types import TYPE_MAPPING
+from ..types import (
+    OPTIONAL_TYPE_REQUIREMENTS,
+    OPTIONAL_TYPE_SUPPORT,
+    PYMILVUS_VERSION,
+    TYPE_MAPPING,
+)
 from .base import BaseValidator
 
 # Validation ranges and helper functions
@@ -155,7 +160,22 @@ class FieldValidator(BaseValidator):
         Raises:
             UnsupportedTypeError: If field type is not supported
         """
+        if field_type in OPTIONAL_TYPE_SUPPORT and not OPTIONAL_TYPE_SUPPORT.get(
+            field_type, False
+        ):
+            requirement = OPTIONAL_TYPE_REQUIREMENTS[field_type]
+            raise SchemaConversionError(
+                f"Field type '{field_type}' {requirement}. "
+                f"Current pymilvus version: {PYMILVUS_VERSION}."
+            )
+
         if field_type not in TYPE_MAPPING:
+            requirement = OPTIONAL_TYPE_REQUIREMENTS.get(field_type)
+            if requirement and not OPTIONAL_TYPE_SUPPORT.get(field_type, False):
+                raise SchemaConversionError(
+                    f"Field type '{field_type}' {requirement}. "
+                    f"Current pymilvus version: {PYMILVUS_VERSION}."
+                )
             supported_types = sorted(TYPE_MAPPING.keys())
             raise UnsupportedTypeError(
                 f"Unsupported field type '{field_type}' for field '{field_name}'. "
