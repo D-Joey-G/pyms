@@ -1,0 +1,59 @@
+# Collection showcasing BM25 functions and text analyzers
+name: "bm25_hybrid_schema"
+description: "Hybrid search schema combining dense and sparse representations"
+
+fields:
+  - name: "doc_id"
+    type: "int64"
+    is_primary: true
+    auto_id: false
+  - name: "title"
+    type: "varchar"
+    max_length: 256
+    enable_analyzer: true
+    enable_match: true
+    analyzer_params:
+      type: "english"
+  - name: "body"
+    type: "varchar"
+    max_length: 4096
+    enable_analyzer: true
+    enable_match: true
+    analyzer_params:
+      type: "english"
+  - name: "bm25_body"
+    type: "sparse_float_vector"
+    nullable: true
+  - name: "embedding"
+    type: "float_vector"
+    dim: 768
+
+functions:
+  - name: "bm25_body_builder"
+    type: "BM25"
+    input_fields:
+      - "body"
+    output_field: "bm25_body"
+    params:
+      bm25_k1: 1.5
+      bm25_b: 0.65
+
+indexes:
+  - field: "embedding"
+    type: "HNSW"
+    metric: "IP"
+    params:
+      M: 32
+      efConstruction: 200
+  - field: "bm25_body"
+    type: "SPARSE_INVERTED_INDEX"
+    metric: "BM25"
+    params:
+      inverted_index_algo: "DAAT_MAXSCORE"
+  - field: "title"
+    type: "TRIE"
+  - field: "doc_id"
+    type: "STL_SORT"
+
+settings:
+  consistency_level: "Strong"

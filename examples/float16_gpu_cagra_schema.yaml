@@ -1,0 +1,36 @@
+# Collection using float16 vectors with GPU_CAGRA indexing
+name: "float16_gpu_cagra_schema"
+description: "Demonstrates GPU graph indexing with half-precision embeddings"
+
+fields:
+  - name: "item_id"
+    type: "int64"
+    is_primary: true
+    auto_id: true
+  - name: "metadata"
+    type: "json"
+  - name: "embedding_fp16"
+    type: "float16_vector"
+    dim: 512
+  - name: "embedding_fallback"
+    type: "float_vector"
+    dim: 512
+
+indexes:
+  - field: "embedding_fp16"
+    type: "GPU_CAGRA"
+    metric: "L2"
+    params:
+      intermediate_graph_degree: 64
+      graph_degree: 32
+      build_algo: "IVF_PQ"
+      cache_dataset_on_device: "false"
+  - field: "embedding_fallback"
+    type: "IVF_SQ8"
+    metric: "L2"
+    params:
+      nlist: 2048
+
+settings:
+  consistency_level: "Bounded"
+  enable_dynamic_field: false

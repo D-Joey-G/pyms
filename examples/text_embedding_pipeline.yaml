@@ -1,0 +1,41 @@
+# Collection demonstrating TEXT_EMBEDDING functions with autoindex
+name: "text_embedding_pipeline"
+description: "Pipeline that derives dense embeddings from raw text"
+
+autoindex: true
+
+fields:
+  - name: "doc_id"
+    type: "int64"
+    is_primary: true
+    auto_id: false
+  - name: "raw_text"
+    type: "varchar"
+    max_length: 2048
+    enable_analyzer: true
+    analyzer_params:
+      type: "english"
+  - name: "text_embedding"
+    type: "float_vector"
+    dim: 1024
+
+functions:
+  - name: "raw_text_embedding"
+    type: "TEXT_EMBEDDING"
+    input_fields:
+      - "raw_text"
+    output_field: "text_embedding"
+    params:
+      model: "text-embedding-3-small"
+      batching: 32
+
+indexes:
+  - field: "text_embedding"
+    metric: "IP"
+  - field: "raw_text"
+    type: "TRIE"
+
+settings:
+  num_partitions: 8
+  properties:
+    collection.ttl.seconds: 604800

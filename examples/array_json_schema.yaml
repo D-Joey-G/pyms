@@ -1,0 +1,37 @@
+# Collection highlighting array handling and JSON filtering
+name: "array_json_schema"
+description: "Schema mixing array metadata and JSON attributes"
+
+fields:
+  - name: "record_id"
+    type: "int64"
+    is_primary: true
+    auto_id: false
+  - name: "tags"
+    type: "array"
+    element_type: "varchar"
+    max_capacity: 32
+    max_length: 64
+  - name: "attributes"
+    type: "json"
+  - name: "created_at"
+    type: "int64"
+  - name: "embedding"
+    type: "float_vector"
+    dim: 384
+
+indexes:
+  - field: "tags"
+    type: "INVERTED"
+  - field: "attributes"
+    type: "INVERTED"
+  - field: "created_at"
+    type: "STL_SORT"
+  - field: "embedding"
+    type: "IVF_FLAT"
+    metric: "COSINE"
+    params:
+      nlist: 512
+
+settings:
+  consistency_level: "Eventually"

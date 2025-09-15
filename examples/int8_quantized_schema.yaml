@@ -1,0 +1,38 @@
+# Collection showcasing quantized int8 vectors and categorical filters
+name: "int8_quantized_schema"
+description: "Quantized recommendation schema with categorical filtering"
+
+fields:
+  - name: "user_id"
+    type: "int64"
+    is_primary: true
+    auto_id: false
+  - name: "quantized_embedding"
+    type: "int8_vector"
+    dim: 256
+  - name: "categories"
+    type: "array"
+    element_type: "varchar"
+    max_capacity: 16
+    max_length: 48
+  - name: "is_active"
+    type: "bool"
+  - name: "score"
+    type: "float"
+
+indexes:
+  - field: "quantized_embedding"
+    type: "HNSW"
+    metric: "IP"
+    params:
+      M: 32
+      efConstruction: 256
+  - field: "categories"
+    type: "BITMAP"
+  - field: "is_active"
+    type: "BITMAP"
+  - field: "score"
+    type: "STL_SORT"
+
+settings:
+  enable_dynamic_field: false
