@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Any
 from pymilvus import CollectionSchema
 
 from ..exceptions import SchemaConversionError, UnsupportedTypeError
+from ..types import PYMILVUS_VERSION, PYMILVUS_VERSION_INFO, parse_version
 from .field import FieldBuilder
 from .function import FunctionBuilder
 from .index import IndexBuilder
@@ -31,6 +32,7 @@ class SchemaBuilder:
             t = f.get("type")
             if isinstance(name, str) and isinstance(t, str):
                 self._field_types[name] = t
+        self._validate_runtime_requirements()
         self._autoindex: bool = self.autoindex_enabled
 
         # Initialize specialized builders
@@ -152,6 +154,88 @@ class SchemaBuilder:
     def get_function_index_warnings(self) -> list[str]:
         """Get warnings for function-index relationship issues."""
         return self.function_builder.get_function_index_warnings()
+
+    def _validate_runtime_requirements(self) -> None:
+        """Validate schema-level runtime requirements (e.g., pymilvus version)."""
+
+        requirements = self.schema_dict.get("pymilvus")
+        if requirements is None:
+            return
+
+        if not isinstance(requirements, dict):
+            raise SchemaConversionError(
+                "Schema 'pymilvus' section must be a mapping with version bounds."
+            )
+
+        allowed_keys = {
+            "min_version",
+            "max_version",
+            "version",
+            "require",
+            "exact_version",
+        }
+        unknown = set(requirements.keys()) - allowed_keys
+        if unknown:
+            raise SchemaConversionError(
+                "Schema 'pymilvus' section contains unsupported keys: "
+                + ", ".join(sorted(unknown))
+            )
+
+        def _parse(key: str) -> tuple[int, ...] | None:
+            value = requirements.get(key)
+            if value is None:
+                return None
+            if not isinstance(value, str):
+                raise SchemaConversionError(
+                    f"Schema 'pymilvus.{key}' must be a version string"
+                )
+            try:
+                return parse_version(value)
+            except ValueError as exc:  # pragma: no cover - defensive
+                raise SchemaConversionError(
+                    f"Invalid version string for 'pymilvus.{key}': {value}"
+                ) from exc
+
+        min_version = _parse("min_version")
+        max_version = _parse("max_version")
+        version_exact = (
+            _parse("version") or _parse("require") or _parse("exact_version")
+        )
+
+        if version_exact is not None and (min_version or max_version):
+            raise SchemaConversionError(
+                "Schema 'pymilvus' section cannot combine 'version' with min/max "
+                "bounds."
+            )
+
+        if min_version and max_version and min_version > max_version:
+            raise SchemaConversionError(
+                "Schema 'pymilvus' min_version must be less than or equal to "
+                "max_version"
+            )
+
+        current_tuple = PYMILVUS_VERSION_INFO
+
+        if version_exact is not None and current_tuple != version_exact:
+            requested = ".".join(str(part) for part in version_exact)
+            raise SchemaConversionError(
+                f"Schema requires pymilvus=={requested}, but current version is "
+                f"{PYMILVUS_VERSION}."
+            )
+
+        if min_version is not None and current_tuple < min_version:
+            requested = ".".join(str(part) for part in min_version)
+            raise SchemaConversionError(
+                f"Schema requires pymilvus>={requested}, but current version is "
+                f"{PYMILVUS_VERSION}."
+            )
+
+        if max_version is not None and current_tuple > max_version:
+            requested = ".".join(str(part) for part in max_version)
+            raise SchemaConversionError(
+                f"Schema requires pymilvus<={requested}, but current version is "
+                f"{PYMILVUS_VERSION}."
+            )
 
     # Delegate other methods to original builder
     @property

@@ -142,6 +142,45 @@
         "Eventually"
       ]
     },
+    "PymilvusRequirement": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Optional pymilvus version requirements for this schema.",
+      "properties": {
+        "min_version": {
+          "type": "string",
+          "pattern": "^\\d+(\\.\\d+){1,2}$",
+          "markdownDescription": "Minimum pymilvus version required (e.g., 2.6.0)."
+        },
+        "max_version": {
+          "type": "string",
+          "pattern": "^\\d+(\\.\\d+){1,2}$",
+          "markdownDescription": "Maximum pymilvus version allowed (inclusive)."
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^\\d+(\\.\\d+){1,2}$",
+          "markdownDescription": "Exact pymilvus version required."
+        },
+        "require": {
+          "type": "string",
+          "pattern": "^\\d+(\\.\\d+){1,2}$",
+          "markdownDescription": "Alias for `version`."
+        },
+        "exact_version": {
+          "type": "string",
+          "pattern": "^\\d+(\\.\\d+){1,2}$",
+          "markdownDescription": "Alias for `version`."
+        }
+      },
+      "anyOf": [
+        {"required": ["min_version"]},
+        {"required": ["max_version"]},
+        {"required": ["version"]},
+        {"required": ["require"]},
+        {"required": ["exact_version"]}
+      ]
+    },
     "FieldDefinition": {
       "title": "Field Definition",
       "type": "object",
@@ -627,6 +666,10 @@
     "description": {
       "type": "string",
       "markdownDescription": "Human-readable description of the collection."
+    },
+    "pymilvus": {
+      "$ref": "#/definitions/PymilvusRequirement",
+      "markdownDescription": "Optional pymilvus version constraints (e.g., {min_version: \"2.6.0\"})."
     },
     "autoindex": {
       "type": "boolean",

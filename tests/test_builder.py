@@ -95,6 +95,51 @@ class TestSchemaBuilder:
             builder = SchemaBuilder(schema_dict3)
             _ = builder.autoindex_enabled
 
+    def test_schema_min_version_requirement(self, valid_schema_dict, monkeypatch):
+        schema_dict = valid_schema_dict.copy()
+        schema_dict["pymilvus"] = {"min_version": "99.0.0"}
+
+        monkeypatch.setattr(
+            "pyamlvus.builders.schema.PYMILVUS_VERSION_INFO", (2, 5, 0), raising=False
+        )
+        monkeypatch.setattr(
+            "pyamlvus.builders.schema.PYMILVUS_VERSION", "2.5.0", raising=False
+        )
+
+        with pytest.raises(
+            SchemaConversionError,
+            match="pymilvus>=99.0.0",
+        ):
+            SchemaBuilder(schema_dict)
+
+    def test_schema_exact_version_requirement_conflict(
+        self, valid_schema_dict, monkeypatch
+    ):
+        schema_dict = valid_schema_dict.copy()
+        schema_dict["pymilvus"] = {"version": "1.0.0"}
+
+        monkeypatch.setattr(
+            "pyamlvus.builders.schema.PYMILVUS_VERSION_INFO", (2, 6, 0), raising=False
+        )
+        monkeypatch.setattr(
+            "pyamlvus.builders.schema.PYMILVUS_VERSION", "2.6.0", raising=False
+        )
+
+        with pytest.raises(
+            SchemaConversionError,
+            match="pymilvus==1.0.0",
+        ):
+            SchemaBuilder(schema_dict)
+
+    def test_schema_pymilvus_invalid_shape(self, valid_schema_dict):
+        schema_dict = valid_schema_dict.copy()
+        schema_dict["pymilvus"] = "2.6.0"
+
+        with pytest.raises(
+            SchemaConversionError, match="pymilvus' section must be a mapping"
+        ):
+            SchemaBuilder(schema_dict)
+
     def test_bm25_function_output_field_auto_index(self, valid_schema_dict):
         """Test that BM25 function output fields get correct index automatically."""
         schema_dict = valid_schema_dict.copy()

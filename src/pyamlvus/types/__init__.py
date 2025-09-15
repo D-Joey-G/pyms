@@ -7,6 +7,11 @@ from .compat import (
     OPTIONAL_TYPE_REQUIREMENTS,
     OPTIONAL_TYPE_SUPPORT,
     PYMILVUS_VERSION,
+    PYMILVUS_VERSION_INFO,
+    parse_version,
+    version_at_least,
+    version_at_most,
+    version_matches,
 )
 from .constants import (
     BINARY_METRICS,
@@ -31,4 +36,9 @@ __all__ = [
     "OPTIONAL_INDEX_SUPPORT",
     "OPTIONAL_INDEX_REQUIREMENTS",
     "PYMILVUS_VERSION",
+    "PYMILVUS_VERSION_INFO",
+    "parse_version",
+    "version_at_least",
+    "version_at_most",
+    "version_matches",
 ]

@@ -209,6 +209,18 @@ index_params = builder.get_milvus_index_params(client)
 - `TANIMOTO` - Tanimoto distance (binary vectors)
 - `BM25` - BM25 scoring (sparse vectors)
 
+## Runtime Requirements
+
+Specify runtime compatibility directly in the schema when you rely on newer PyMilvus features:
+
+```yaml
+pymilvus:
+  min_version: "2.6.0"
+```
+
+Supported keys: `min_version`, `max_version`, and `version` (aliases `require` / `exact_version`).
+If the current client falls outside the declared range, pyamlvus raises a clear error before building the schema.
+
 ## Text Match Support
 
 Enable keyword matching on VARCHAR fields for precise text retrieval:

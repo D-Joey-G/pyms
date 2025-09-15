@@ -61,3 +61,29 @@ OPTIONAL_INDEX_REQUIREMENTS: dict[str, str] = {
     name: f"Requires pymilvus>={_version_str(version)}"
     for name, version in OPTIONAL_INDEX_MIN_VERSIONS.items()
 }
+
+
+def parse_version(version: str) -> tuple[int, ...]:
+    """Public helper to parse version strings consistently."""
+
+    if not isinstance(version, str) or not version.strip():
+        raise ValueError("Version string must be a non-empty string")
+    return _version_tuple(version)
+
+
+def version_matches(version: str) -> bool:
+    """Check if the installed pymilvus matches the provided exact version."""
+
+    return PYMILVUS_VERSION_INFO == parse_version(version)
+
+
+def version_at_least(min_version: str) -> bool:
+    """Check if the installed pymilvus is at least the provided version."""
+
+    return PYMILVUS_VERSION_INFO >= parse_version(min_version)
+
+
+def version_at_most(max_version: str) -> bool:
+    """Check if the installed pymilvus is at most the provided version."""
+
+    return PYMILVUS_VERSION_INFO <= parse_version(max_version)

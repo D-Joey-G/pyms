@@ -2,6 +2,9 @@
 name: "float16_gpu_cagra_schema"
 description: "Demonstrates GPU graph indexing with half-precision embeddings"
 
+pymilvus:
+  min_version: "2.6.0"
+
 fields:
   - name: "item_id"
     type: "int64"
