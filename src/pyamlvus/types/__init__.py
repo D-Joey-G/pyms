@@ -9,9 +9,6 @@ from .compat import (
     PYMILVUS_VERSION,
     PYMILVUS_VERSION_INFO,
     parse_version,
-    version_at_least,
-    version_at_most,
-    version_matches,
 )
 from .constants import (
     BINARY_METRICS,
@@ -38,7 +35,4 @@ __all__ = [
     "PYMILVUS_VERSION",
     "PYMILVUS_VERSION_INFO",
     "parse_version",
-    "version_at_least",
-    "version_at_most",
-    "version_matches",
 ]
