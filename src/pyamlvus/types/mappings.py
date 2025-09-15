@@ -16,6 +16,9 @@ TYPE_MAPPING = {
     "json": DataType.JSON,
     "array": DataType.ARRAY,
     "float_vector": DataType.FLOAT_VECTOR,
+    "float16_vector": DataType.FLOAT16_VECTOR,
+    "bfloat16_vector": DataType.BFLOAT16_VECTOR,
     "binary_vector": DataType.BINARY_VECTOR,
+    "int8_vector": DataType.INT8_VECTOR,
     "sparse_float_vector": DataType.SPARSE_FLOAT_VECTOR,
 }

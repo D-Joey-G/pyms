@@ -189,12 +189,14 @@ index_params = builder.get_milvus_index_params(client)
 - `BIN_FLAT`, `BIN_IVF_FLAT` (for binary vectors)
 - `SPARSE_INVERTED_INDEX` (for sparse vectors)
 - GPU indexes: `GPU_IVF_FLAT`, `GPU_IVF_PQ`, `GPU_CAGRA`, `GPU_BRUTE_FORCE`
+  - `GPU_*` indexes do not support the `COSINE` metric. Normalize vectors and use `IP` if cosine similarity is required.
+  - `int8_vector` fields currently support only the `HNSW` index type.
 
 ### Scalar Indexes
 
 - `TRIE` (for VARCHAR fields)
 - `INVERTED` (for text search)
-- `SORTED` (for numeric fields)
+- `STL_SORT` (for numeric fields)
 
 ## Supported Metrics
 

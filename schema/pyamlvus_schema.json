@@ -68,7 +68,10 @@
         "json",
         "array",
         "float_vector",
+        "float16_vector",
+        "bfloat16_vector",
         "binary_vector",
+        "int8_vector",
         "sparse_float_vector"
       ]
     },
@@ -99,6 +102,8 @@
         "AUTOINDEX",
         "GPU_IVF_FLAT",
         "GPU_IVF_PQ",
+        "GPU_CAGRA",
+        "GPU_BRUTE_FORCE",
         "BIN_FLAT",
         "BIN_IVF_FLAT",
         "MINHASH_LSH",

@@ -7,6 +7,7 @@ from ..exceptions import SchemaConversionError
 from ..types import (
     BINARY_METRICS,
     FLOAT_METRICS,
+    GPU_INDEX_TYPES,
     RECOMMENDED_INDEX_TYPES,
     REQUIRED_PARAMS,
     VALID_INDEX_TYPES,
@@ -59,7 +60,7 @@ class IndexValidator(BaseValidator):
 
         # Validate metric if provided
         if "metric" in item:
-            self._validate_metric(item["metric"], field_type, field_name)
+            self._validate_metric(item["metric"], field_type, field_name, index_type)
 
         # Validate parameters (always check required params even if no params provided)
         params = item.get("params", {})
@@ -94,23 +95,41 @@ class IndexValidator(BaseValidator):
                 f"Fix: Use one of the valid index types listed above."
             )
 
-    def _validate_metric(self, metric: str, field_type: str, field_name: str) -> None:
+    def _validate_metric(
+        self,
+        metric: str,
+        field_type: str,
+        field_name: str,
+        index_type: str | None,
+    ) -> None:
         """Validate metric compatibility with field type.
 
         Args:
             metric: Metric name
             field_type: Type of field
             field_name: Name of the field
+            index_type: Selected index type if provided
 
         Raises:
             SchemaConversionError: If metric is not compatible
         """
         metric_upper = metric.upper()
 
-        if field_type == "float_vector":
+        if index_type and index_type in GPU_INDEX_TYPES and metric_upper == "COSINE":
+            raise SchemaConversionError(
+                f"Metric 'COSINE' is not supported for GPU index '{index_type}' on "
+                f"field '{field_name}'. Use L2 or IP after normalizing vectors."
+            )
+
+        if field_type in {
+            "float_vector",
+            "float16_vector",
+            "bfloat16_vector",
+            "int8_vector",
+        }:
             if metric_upper not in FLOAT_METRICS:
                 raise SchemaConversionError(
-                    f"Invalid metric '{metric}' for float_vector field '{field_name}'. "
+                    f"Invalid metric '{metric}' for {field_type} field '{field_name}'. "
                     f"Allowed: {sorted(FLOAT_METRICS)}"
                 )
         elif field_type == "binary_vector":
@@ -234,7 +253,14 @@ class IndexValidator(BaseValidator):
         # Check for unindexed vector fields
         for field_name in all_field_names:
             field_type = self.field_types.get(field_name, "")
-            if field_type in {"float_vector", "binary_vector", "sparse_float_vector"}:
+            if field_type in {
+                "float_vector",
+                "float16_vector",
+                "bfloat16_vector",
+                "int8_vector",
+                "binary_vector",
+                "sparse_float_vector",
+            }:
                 if field_name not in indexed_fields:
                     warnings.append(
                         f"WARNING: {field_type.upper()} field '{field_name}' has no "

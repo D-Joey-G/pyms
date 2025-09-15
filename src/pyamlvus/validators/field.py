@@ -10,6 +10,9 @@ from .base import BaseValidator
 # Validation ranges and helper functions
 VECTOR_DIM_RANGES = {
     "float_vector": (1, 32768),  # Milvus limits
+    "float16_vector": (1, 32768),
+    "bfloat16_vector": (1, 32768),
+    "int8_vector": (1, 32768),
     "binary_vector": (1, 32768 * 8),  # bits
     "sparse_float_vector": (1, 2**31 - 1),
 }
@@ -174,7 +177,13 @@ class FieldValidator(BaseValidator):
         """
         if field_type == "varchar":
             self._validate_varchar_params(field_def, field_name)
-        elif field_type in {"float_vector", "binary_vector"}:
+        elif field_type in {
+            "float_vector",
+            "float16_vector",
+            "bfloat16_vector",
+            "int8_vector",
+            "binary_vector",
+        }:
             self._validate_vector_params(field_def, field_type, field_name)
         elif field_type == "sparse_float_vector":
             # sparse_float_vector doesn't require dim parameter

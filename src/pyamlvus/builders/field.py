@@ -89,7 +89,14 @@ class FieldBuilder:
                 params.pop("max_length", None)
 
         # For vector fields, dim is a direct parameter, not in params
-        elif type_str in {"float_vector", "binary_vector", "sparse_float_vector"}:
+        elif type_str in {
+            "float_vector",
+            "float16_vector",
+            "bfloat16_vector",
+            "int8_vector",
+            "binary_vector",
+            "sparse_float_vector",
+        }:
             dim = field_def.get("dim")
             if dim is not None:
                 kwargs["dim"] = dim
@@ -162,7 +169,14 @@ class FieldBuilder:
             if max_length is not None:
                 params["max_length"] = max_length
 
-        elif type_str in {"float_vector", "binary_vector", "sparse_float_vector"}:
+        elif type_str in {
+            "float_vector",
+            "float16_vector",
+            "bfloat16_vector",
+            "int8_vector",
+            "binary_vector",
+            "sparse_float_vector",
+        }:
             dim = field_def.get("dim")
             if dim is not None:
                 params["dim"] = dim

@@ -48,6 +48,18 @@ class TestFieldParameterValidation:
         with pytest.raises(SchemaConversionError, match="max_capacity 10000"):
             builder.build()
 
+    def test_float16_vector_requires_dim(self):
+        schema_dict = create_schema_dict(
+            "float16_no_dim",
+            [
+                {"name": "id", "type": "int64", "is_primary": True},
+                {"name": "vec", "type": "float16_vector"},
+            ],
+        )
+        builder = SchemaBuilder(schema_dict)
+        with pytest.raises(SchemaConversionError, match="missing required 'dim'"):
+            builder.build()
+
 
 @pytest.mark.unit
 class TestIndexValidation:
@@ -91,3 +103,50 @@ class TestIndexValidation:
         builder = SchemaBuilder(schema_dict)
         with pytest.raises(SchemaConversionError, match="Invalid metric 'HAMMING'"):
             builder.get_create_index_calls()
+
+    def test_gpu_index_disallows_cosine(self):
+        schema_dict = create_schema_dict(
+            "gpu_cosine",
+            [
+                {"name": "id", "type": "int64", "is_primary": True},
+                {"name": "vec", "type": "float_vector", "dim": 128},
+            ],
+            indexes=[{"field": "vec", "type": "GPU_IVF_FLAT", "metric": "COSINE"}],
+        )
+        builder = SchemaBuilder(schema_dict)
+        with pytest.raises(
+            SchemaConversionError, match="COSINE' is not supported for GPU index"
+        ):
+            builder.get_create_index_calls()
+
+    def test_int8_vector_allows_only_hnsw(self):
+        schema_dict = create_schema_dict(
+            "int8_vector_bad_index",
+            [
+                {"name": "id", "type": "int64", "is_primary": True},
+                {"name": "vec", "type": "int8_vector", "dim": 64},
+            ],
+            indexes=[{"field": "vec", "type": "IVF_FLAT", "metric": "L2"}],
+        )
+        builder = SchemaBuilder(schema_dict)
+        with pytest.raises(SchemaConversionError, match=r"Valid types: \['HNSW'\]"):
+            builder.get_create_index_calls()
+
+        schema_dict_ok = create_schema_dict(
+            "int8_vector_hnsw",
+            [
+                {"name": "id", "type": "int64", "is_primary": True},
+                {"name": "vec", "type": "int8_vector", "dim": 64},
+            ],
+            indexes=[
+                {
+                    "field": "vec",
+                    "type": "HNSW",
+                    "metric": "L2",
+                    "params": {"M": 16, "efConstruction": 200},
+                }
+            ],
+        )
+        builder_ok = SchemaBuilder(schema_dict_ok)
+        # Should not raise
+        builder_ok.get_create_index_calls()
