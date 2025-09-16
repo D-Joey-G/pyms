@@ -1,7 +1,7 @@
 import pytest
 
-from pyamlvus.exceptions import SchemaParseError
-from pyamlvus.parser import SchemaLoader
+from pyms.exceptions import SchemaParseError
+from pyms.parser import SchemaLoader
 
 
 @pytest.mark.unit

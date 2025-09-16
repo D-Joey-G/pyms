@@ -1,7 +1,7 @@
 import pytest
 
-from pyamlvus.builders.schema import SchemaBuilder
-from pyamlvus.exceptions import SchemaConversionError
+from pyms.builders.schema import SchemaBuilder
+from pyms.exceptions import SchemaConversionError
 from tests.conftest import create_schema_dict
 
 
@@ -61,7 +61,7 @@ class TestFieldParameterValidation:
             builder.build()
 
     def test_float16_vector_requires_newer_pymilvus(self, monkeypatch):
-        from pyamlvus import types
+        from pyms import types
 
         monkeypatch.setitem(types.OPTIONAL_TYPE_SUPPORT, "float16_vector", False)
 
@@ -137,7 +137,7 @@ class TestIndexValidation:
             builder.get_create_index_calls()
 
     def test_gpu_cagra_requires_newer_pymilvus(self, monkeypatch):
-        from pyamlvus import types
+        from pyms import types
 
         monkeypatch.setitem(types.OPTIONAL_INDEX_SUPPORT, "GPU_CAGRA", False)
 

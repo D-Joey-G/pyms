@@ -1,5 +1,5 @@
 class MilvusYamlError(Exception):
-    """Base exception for all pyamlvus errors."""
+    """Base exception for all pyms errors."""
 
     pass
 

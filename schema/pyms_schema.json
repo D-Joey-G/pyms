@@ -1,8 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://raw.githubusercontent.com/D-Joey-G/pyamlvus/main/schema/pyamlvus_schema.json",
+  "$id": "https://raw.githubusercontent.com/D-Joey-G/pyms/main/schema/pyms_schema.json",
   "title": "Milvus YAML Schema",
-  "description": "JSON Schema for validating Milvus collection YAML files used by pyamlvus.",
+  "description": "JSON Schema for validating Milvus collection YAML files used by pyms.",
   "markdownDescription": "Define Milvus collections declaratively in YAML.\n\nHighlights:\n- Strong typing for fields and parameters\n- Conditional rules for vectors, arrays, and VARCHAR\n- Index and function scaffolds with sensible defaults\n\nUse with the Red Hat YAML extension for completions and hover docs.",
   "type": "object",
   "additionalProperties": false,

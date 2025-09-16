@@ -32,7 +32,7 @@ def resolve_autoindex_flag(schema: dict[str, Any]) -> bool:
 
     settings = schema.get("settings")
     if isinstance(settings, dict):
-        autoindex_candidates.extend(  # type: ignore[list-item]
+        autoindex_candidates.extend(
             [
                 ("settings.autoindex", settings.get("autoindex")),
                 ("settings.enable_autoindex", settings.get("enable_autoindex")),

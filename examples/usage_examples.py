@@ -1,7 +1,7 @@
 """
-Python usage examples for pyamlvus.
+Python usage examples for pyms.
 
-This file demonstrates how to use pyamlvus to work with Milvus schemas
+This file demonstrates how to use pyms to work with Milvus schemas
 defined in YAML format.
 """
 
@@ -9,7 +9,7 @@ from pathlib import Path
 
 from pymilvus import MilvusClient
 
-from pyamlvus import (
+from pyms import (
     SchemaBuilder,
     SchemaLoader,
     load_schema,
@@ -103,7 +103,7 @@ def example_with_milvus():
     try:
         client = MilvusClient(uri="http://localhost:19530")
 
-        collection_name = "pyamlvus_example"
+        collection_name = "pyms_example"
 
         # Drop collection if it exists
         if client.has_collection(collection_name):
@@ -229,7 +229,7 @@ def example_custom_schema():
 
 def main():
     """Run all examples."""
-    print("PyAMLVus Usage Examples")
+    print("pyms Usage Examples")
     print("=" * 50)
 
     example_basic_usage()

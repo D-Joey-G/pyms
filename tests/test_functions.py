@@ -1,9 +1,9 @@
 import pytest
 import yaml
 
-from pyamlvus.builders.schema import SchemaBuilder
-from pyamlvus.exceptions import SchemaConversionError
-from pyamlvus.parser import SchemaLoader
+from pyms.builders.schema import SchemaBuilder
+from pyms.exceptions import SchemaConversionError
+from pyms.parser import SchemaLoader
 
 
 @pytest.mark.unit
