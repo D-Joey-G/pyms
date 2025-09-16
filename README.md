@@ -1,6 +1,6 @@
 # pyms
 
-pyms is a *P*ython library for using *Y*AML to declaritively manage *M*ilvus *s*chemas.
+pyms is a **P**ython library for using **Y**AML to declaritively manage **M**ilvus **s**chemas.
 
 ## Quick Start
 
