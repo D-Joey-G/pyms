@@ -10,7 +10,7 @@ from ..types import PYMILVUS_VERSION, PYMILVUS_VERSION_INFO, parse_version
 from .field import FieldValidator
 from .function import FunctionValidator
 from .index import IndexValidator
-from .result import ValidationResult
+from .result import ValidationResult, ValidationSeverity
 
 
 @dataclass(slots=True)
@@ -184,7 +184,12 @@ class SchemaValidator:
         for warning in index_validator.get_index_warnings(
             set(field_types.keys()), indexes
         ):
-            result.messages.append(warning)
+            if warning.severity is ValidationSeverity.ERROR:
+                result.add_error(warning.text)
+            elif warning.severity is ValidationSeverity.WARNING:
+                result.add_warning(warning.text)
+            else:
+                result.add_info(warning.text)
 
         function_validator = FunctionValidator(set(field_types.keys()), raw_fields)
         functions = self.schema_dict.get("functions", []) or []
@@ -198,7 +203,12 @@ class SchemaValidator:
         for message in function_validator.validate_function_index_relationships(
             functions, indexes
         ):
-            result.messages.append(message)
+            if message.severity is ValidationSeverity.ERROR:
+                result.add_error(message.text)
+            elif message.severity is ValidationSeverity.WARNING:
+                result.add_warning(message.text)
+            else:
+                result.add_info(message.text)
 
         context = SchemaValidationContext(
             field_types=field_types, fields=validated_fields

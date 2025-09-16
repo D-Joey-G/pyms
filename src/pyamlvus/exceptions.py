@@ -32,26 +32,6 @@ class SchemaParseError(MilvusYamlError):
         super().__init__(f"{message}{location_info}")
 
 
-class SchemaValidationError(MilvusYamlError):
-    """Raised when schema validation fails."""
-
-    def __init__(
-        self,
-        message: str,
-        field_name: str | None = None,
-        errors: list[str] | None = None,
-    ):
-        self.field_name = field_name
-        self.errors = errors or []
-
-        field_info = f" in field '{field_name}'" if field_name else ""
-        error_details = ""
-        if self.errors:
-            error_details = f". Details: {'; '.join(self.errors)}"
-
-        super().__init__(f"{message}{field_info}{error_details}")
-
-
 class SchemaConversionError(MilvusYamlError):
     """Raised when converting dict to CollectionSchema fails."""
 

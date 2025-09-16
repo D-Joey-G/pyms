@@ -28,7 +28,6 @@ def load_schema(file_path: str | Path) -> "CollectionSchema":
 
     Raises:
         SchemaParseError: If the YAML file cannot be parsed
-        SchemaValidationError: If the schema is invalid
         SchemaConversionError: If the schema cannot be converted to CollectionSchema
 
     Example:
@@ -90,7 +89,6 @@ def build_collection_from_yaml(file_path: str | Path) -> "CollectionSchema":
 
     Raises:
         SchemaParseError: If the YAML file cannot be parsed
-        SchemaValidationError: If the schema is invalid
         SchemaConversionError: If the schema cannot be converted
     """
     return load_schema(file_path)
@@ -106,7 +104,6 @@ def build_collection_from_dict(schema_dict: dict[str, Any]) -> "CollectionSchema
         PyMilvus CollectionSchema object
 
     Raises:
-        SchemaValidationError: If the schema is invalid
         SchemaConversionError: If the schema cannot be converted
     """
     builder = SchemaBuilder(schema_dict)

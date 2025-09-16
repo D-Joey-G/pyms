@@ -36,12 +36,6 @@ class TestSchemaBuilder:
         vector_field = schema.fields[2]
         assert_field_properties(vector_field, "vector", DataType.FLOAT_VECTOR, dim=128)
 
-    def test_autoindex_enabled_setting(self, valid_schema_dict):
-        """Test that autoindex setting is properly stored."""
-        # Default should be False
-        builder = SchemaBuilder(valid_schema_dict)
-        assert builder._autoindex is False
-
     def test_autoindex_missing_index_type(self, valid_schema_dict):
         """Test behavior when index type is missing and autoindex is
         enabled/disabled."""

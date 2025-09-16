@@ -204,9 +204,3 @@ class SchemaBuilder:
     def alias(self) -> str:
         """Get the collection alias from the schema dictionary."""
         return self.schema_dict.get("alias", "")
-
-    @property
-    def autoindex_enabled(self) -> bool:
-        """Get whether AUTOINDEX is enabled for this schema."""
-
-        return self._autoindex
