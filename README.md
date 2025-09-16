@@ -1,6 +1,6 @@
 # pyms
 
-pyms is a **P**ython library for using **Y**AML to declaritively manage **M**ilvus **s**chemas.
+pyms stands for **P**ython **Y**AML **M**ilvus **S**chemas — a library for declaratively managing Milvus collection schemas using YAML.
 
 ## Quick Start
 
