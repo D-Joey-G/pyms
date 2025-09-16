@@ -49,7 +49,7 @@ class ValidationResult(Sequence[str]):
     def add_info(self, text: str) -> None:
         self.add(ValidationSeverity.INFO, text)
 
-    def extend(self, other: "ValidationResult") -> None:
+    def extend(self, other: ValidationResult) -> None:
         self.messages.extend(other.messages)
 
     def __len__(self) -> int:
@@ -105,7 +105,7 @@ class ValidationResult(Sequence[str]):
         return [msg.as_prefixed() for msg in self.messages]
 
     @classmethod
-    def merge(cls, *results: "ValidationResult") -> "ValidationResult":
+    def merge(cls, *results: ValidationResult) -> ValidationResult:
         merged = cls()
         for result in results:
             merged.extend(result)
