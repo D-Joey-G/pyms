@@ -11,6 +11,7 @@ if TYPE_CHECKING:
 from .builders.schema import SchemaBuilder
 from .exceptions import SchemaConversionError
 from .parser import SchemaLoader
+from .validators import ValidationResult
 
 
 def load_schema(file_path: str | Path) -> "CollectionSchema":
@@ -58,26 +59,24 @@ def load_schema_dict(file_path: str | Path) -> dict[str, Any]:
     return loader.to_dict()
 
 
-def validate_schema_file(file_path: str | Path) -> list[str]:
+def validate_schema_file(file_path: str | Path) -> ValidationResult:
     """Validate a YAML schema file and return any errors and warnings.
 
     Args:
         file_path: Path to the YAML schema file
 
     Returns:
-        List of validation messages (errors and warnings).
-        Empty if valid with no warnings.
-        Errors come first, followed by warnings.
+        ValidationResult containing errors, warnings, and infos (if any).
 
     Example:
-        >>> errors = validate_schema_file("my_schema.yaml")
-        >>> if errors:
-        ...     for error in errors:
-        ...         print(f"Validation issue: {error}")
+        >>> result = validate_schema_file("my_schema.yaml")
+        >>> if result.has_errors():
+        ...     for message in result.errors:
+        ...         print(f"Validation issue: {message.text}")
     """
-    from . import validate_schema
+    from . import validate_schema_result
 
-    return validate_schema(file_path)
+    return validate_schema_result(file_path)
 
 
 def build_collection_from_yaml(file_path: str | Path) -> "CollectionSchema":

@@ -17,6 +17,8 @@ from .api import (
 # Core components
 from .builders.schema import SchemaBuilder
 from .parser import SchemaLoader
+from .validators import ValidationResult
+from .validators.schema import SchemaValidator
 
 __version__ = "0.1.0"
 
@@ -25,6 +27,7 @@ __all__ = [
     "SchemaLoader",
     "SchemaBuilder",
     "validate_schema",
+    "validate_schema_result",
     # High-level API
     "load_schema",
     "load_schema_dict",
@@ -36,50 +39,40 @@ __all__ = [
 ]
 
 
-def validate_schema(file_path: str | Path) -> list[str]:
-    """Validate a YAML schema file and return any errors and warnings.
-
-    Args:
-        file_path: Path to the YAML schema file
-
-    Returns:
-        list of validation messages (errors and warnings). Empty if valid with no
-        warnings.
-        Errors come first, followed by warnings.
-    """
-    errors = []
-    warnings = []
+def validate_schema_result(file_path: str | Path) -> ValidationResult:
+    """Validate a YAML schema file and return structured messages."""
+    result = ValidationResult()
 
     try:
-        # First validate parser-level constraints to get better error messages
         loader = SchemaLoader(file_path)
-        # Trigger parser validations explicitly by accessing properties
-        _ = loader.name  # Validates name exists
-        _ = loader.fields  # Validates fields exist and not empty
-        _ = loader.settings  # Validates settings format
-        _ = loader.indexes  # Validates indexes format
-        _ = loader.functions  # Validates functions format
+        # Trigger parser validations explicitly by accessing key properties
+        _ = loader.name
+        _ = loader.fields
+        _ = loader.settings
+        _ = loader.indexes
+        _ = loader.functions
 
-        # Then validate builder-level constraints
         schema_dict = loader.to_dict()
-        builder = SchemaBuilder(schema_dict)
+        schema_validator = SchemaValidator(schema_dict)
+        validation_result, context = schema_validator.validate()
+        result.extend(validation_result)
 
-        # Validate the schema build
-        builder.build()
+        if result.has_errors():
+            return result
 
-        # Validate function definitions explicitly (even if not applied)
-        for func_def in builder.functions or []:
-            builder.validate_function(func_def)
+        builder = SchemaBuilder(schema_dict, context=context)
+        try:
+            builder.build()
+        except Exception as exc:  # pragma: no cover - defensive
+            result.add_error(str(exc))
 
-        # Get index warnings
-        warnings = builder.get_index_warnings()
+    except Exception as exc:
+        result.add_error(str(exc))
 
-        # Get function-index relationship warnings/errors
-        func_index_messages = builder.get_function_index_warnings()
-        warnings.extend(func_index_messages)
+    return result
 
-    except Exception as e:
-        errors.append(str(e))
 
-    # Return errors first, then warnings
-    return errors + warnings
+def validate_schema(file_path: str | Path) -> list[str]:
+    """Legacy helper returning validation messages as prefixed strings."""
+
+    return validate_schema_result(file_path).as_strings()

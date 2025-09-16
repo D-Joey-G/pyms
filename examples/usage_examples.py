@@ -25,11 +25,15 @@ def example_basic_usage():
 
     # Validate the schema file first
     print("Validating schema...")
-    errors = validate_schema_file(schema_file)
-    if errors:
+    validation = validate_schema_file(schema_file)
+    if validation.has_errors() or validation.warnings:
         print("Validation issues:")
-        for error in errors:
-            print(f"  - {error}")
+        for message in validation.errors:
+            print(f"  - ERROR: {message.text}")
+        for message in validation.warnings:
+            print(f"  - WARNING: {message.text}")
+        for message in validation.infos:
+            print(f"  - INFO: {message.text}")
     else:
         print("Schema is valid!")
 

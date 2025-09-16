@@ -128,9 +128,10 @@ class IndexBuilder:
 
         validator = IndexValidator(self.schema_builder._field_types)
         all_field_names = set(self.schema_builder._field_types.keys())
-        return validator.get_index_warnings(
+        messages = validator.get_index_warnings(
             all_field_names, self.schema_builder.indexes
         )
+        return [message.as_prefixed() for message in messages]
 
     def get_create_index_calls(self) -> list[tuple[str, dict[str, Any]]]:
         """Get all create_index calls needed for this schema.

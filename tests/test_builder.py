@@ -71,8 +71,7 @@ class TestSchemaBuilder:
         with pytest.raises(
             SchemaConversionError, match="Multiple autoindex settings found"
         ):
-            builder = SchemaBuilder(schema_dict)
-            _ = builder.autoindex_enabled
+            SchemaBuilder(schema_dict)
 
         # Test top-level and settings
         schema_dict2 = valid_schema_dict.copy()
@@ -82,8 +81,7 @@ class TestSchemaBuilder:
         with pytest.raises(
             SchemaConversionError, match="Multiple autoindex settings found"
         ):
-            builder = SchemaBuilder(schema_dict2)
-            _ = builder.autoindex_enabled
+            SchemaBuilder(schema_dict2)
 
         # Test multiple in settings
         schema_dict3 = valid_schema_dict.copy()
@@ -92,18 +90,19 @@ class TestSchemaBuilder:
         with pytest.raises(
             SchemaConversionError, match="Multiple autoindex settings found"
         ):
-            builder = SchemaBuilder(schema_dict3)
-            _ = builder.autoindex_enabled
+            SchemaBuilder(schema_dict3)
 
     def test_schema_min_version_requirement(self, valid_schema_dict, monkeypatch):
         schema_dict = valid_schema_dict.copy()
         schema_dict["pymilvus"] = {"min_version": "99.0.0"}
 
         monkeypatch.setattr(
-            "pyamlvus.builders.schema.PYMILVUS_VERSION_INFO", (2, 5, 0), raising=False
+            "pyamlvus.validators.schema.PYMILVUS_VERSION_INFO",
+            (2, 5, 0),
+            raising=False,
         )
         monkeypatch.setattr(
-            "pyamlvus.builders.schema.PYMILVUS_VERSION", "2.5.0", raising=False
+            "pyamlvus.validators.schema.PYMILVUS_VERSION", "2.5.0", raising=False
         )
 
         with pytest.raises(
@@ -119,10 +118,12 @@ class TestSchemaBuilder:
         schema_dict["pymilvus"] = {"version": "1.0.0"}
 
         monkeypatch.setattr(
-            "pyamlvus.builders.schema.PYMILVUS_VERSION_INFO", (2, 6, 0), raising=False
+            "pyamlvus.validators.schema.PYMILVUS_VERSION_INFO",
+            (2, 6, 0),
+            raising=False,
         )
         monkeypatch.setattr(
-            "pyamlvus.builders.schema.PYMILVUS_VERSION", "2.6.0", raising=False
+            "pyamlvus.validators.schema.PYMILVUS_VERSION", "2.6.0", raising=False
         )
 
         with pytest.raises(

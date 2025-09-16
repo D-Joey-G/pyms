@@ -13,10 +13,10 @@ from pyamlvus import load_schema, validate_schema_file
 schema = load_schema("my_schema.yaml")
 
 # Validate schema file
-errors = validate_schema_file("my_schema.yaml")
-if errors:
-    for error in errors:
-        print(f"Validation error: {error}")
+result = validate_schema_file("my_schema.yaml")
+if result.has_errors():
+    for message in result.errors:
+        print(f"Validation error: {message.text}")
 else:
     print("Schema is valid!")
 ```
@@ -131,10 +131,10 @@ schema_dict = load_schema_dict("schema.yaml")
 ```python
 from pyamlvus import validate_schema_file
 
-errors = validate_schema_file("schema.yaml")
-if errors:
-    for error in errors:
-        print(f"Error: {error}")
+result = validate_schema_file("schema.yaml")
+if result.has_errors():
+    for error in result.errors:
+        print(f"Error: {error.text}")
 ```
 
 ### Schema Loading & Parsing

@@ -6,7 +6,11 @@ from typing import TYPE_CHECKING, Any
 from pymilvus import CollectionSchema
 
 from ..exceptions import SchemaConversionError, UnsupportedTypeError
-from ..types import PYMILVUS_VERSION, PYMILVUS_VERSION_INFO, parse_version
+from ..validators.schema import (
+    SchemaValidationContext,
+    ensure_runtime_requirements,
+    resolve_autoindex_flag,
+)
 from .field import FieldBuilder
 from .function import FunctionBuilder
 from .index import IndexBuilder
@@ -18,22 +22,30 @@ if TYPE_CHECKING:
 class SchemaBuilder:
     """Main schema builder that orchestrates field, index, and function building."""
 
-    def __init__(self, schema_dict: dict[str, Any]):
+    def __init__(
+        self,
+        schema_dict: dict[str, Any],
+        context: SchemaValidationContext | None = None,
+    ):
         """Initialize with a schema dictionary.
 
         Args:
             schema_dict: dictionary representation of the schema
         """
         self.schema_dict = schema_dict
-        # Map field name -> yaml type string for validation and index checks
-        self._field_types: dict[str, str] = {}
-        for f in self.schema_dict.get("fields", []) or []:
-            name = f.get("name")
-            t = f.get("type")
-            if isinstance(name, str) and isinstance(t, str):
-                self._field_types[name] = t
-        self._validate_runtime_requirements()
-        self._autoindex: bool = self.autoindex_enabled
+
+        if context is not None:
+            self._field_types = dict(context.field_types)
+        else:
+            self._field_types: dict[str, str] = {}
+            for f in self.schema_dict.get("fields", []) or []:
+                name = f.get("name")
+                t = f.get("type")
+                if isinstance(name, str) and isinstance(t, str):
+                    self._field_types[name] = t
+
+        ensure_runtime_requirements(self.schema_dict)
+        self._autoindex = resolve_autoindex_flag(self.schema_dict)
 
         # Initialize specialized builders
         self.field_builder = FieldBuilder()
@@ -155,88 +167,6 @@ class SchemaBuilder:
         """Get warnings for function-index relationship issues."""
         return self.function_builder.get_function_index_warnings()
 
-    def _validate_runtime_requirements(self) -> None:
-        """Validate schema-level runtime requirements (e.g., pymilvus version)."""
-
-        requirements = self.schema_dict.get("pymilvus")
-        if requirements is None:
-            return
-
-        if not isinstance(requirements, dict):
-            raise SchemaConversionError(
-                "Schema 'pymilvus' section must be a mapping with version bounds."
-            )
-
-        allowed_keys = {
-            "min_version",
-            "max_version",
-            "version",
-            "require",
-            "exact_version",
-        }
-        unknown = set(requirements.keys()) - allowed_keys
-        if unknown:
-            raise SchemaConversionError(
-                "Schema 'pymilvus' section contains unsupported keys: "
-                + ", ".join(sorted(unknown))
-            )
-
-        def _parse(key: str) -> tuple[int, ...] | None:
-            value = requirements.get(key)
-            if value is None:
-                return None
-            if not isinstance(value, str):
-                raise SchemaConversionError(
-                    f"Schema 'pymilvus.{key}' must be a version string"
-                )
-            try:
-                return parse_version(value)
-            except ValueError as exc:  # pragma: no cover - defensive
-                raise SchemaConversionError(
-                    f"Invalid version string for 'pymilvus.{key}': {value}"
-                ) from exc
-
-        min_version = _parse("min_version")
-        max_version = _parse("max_version")
-        version_exact = (
-            _parse("version") or _parse("require") or _parse("exact_version")
-        )
-
-        if version_exact is not None and (min_version or max_version):
-            raise SchemaConversionError(
-                "Schema 'pymilvus' section cannot combine 'version' with min/max "
-                "bounds."
-            )
-
-        if min_version and max_version and min_version > max_version:
-            raise SchemaConversionError(
-                "Schema 'pymilvus' min_version must be less than or equal to "
-                "max_version"
-            )
-
-        current_tuple = PYMILVUS_VERSION_INFO
-
-        if version_exact is not None and current_tuple != version_exact:
-            requested = ".".join(str(part) for part in version_exact)
-            raise SchemaConversionError(
-                f"Schema requires pymilvus=={requested}, but current version is "
-                f"{PYMILVUS_VERSION}."
-            )
-
-        if min_version is not None and current_tuple < min_version:
-            requested = ".".join(str(part) for part in min_version)
-            raise SchemaConversionError(
-                f"Schema requires pymilvus>={requested}, but current version is "
-                f"{PYMILVUS_VERSION}."
-            )
-
-        if max_version is not None and current_tuple > max_version:
-            requested = ".".join(str(part) for part in max_version)
-            raise SchemaConversionError(
-                f"Schema requires pymilvus<={requested}, but current version is "
-                f"{PYMILVUS_VERSION}."
-            )
-
     # Delegate other methods to original builder
     @property
     def indexes(self) -> list[dict[str, Any]]:
@@ -279,53 +209,4 @@ class SchemaBuilder:
     def autoindex_enabled(self) -> bool:
         """Get whether AUTOINDEX is enabled for this schema."""
 
-        schema = self.schema_dict
-
-        # Check for autoindex setting in multiple possible locations and key names
-        autoindex_candidates = [
-            ("autoindex", schema.get("autoindex")),
-            ("enable_autoindex", schema.get("enable_autoindex")),
-            ("use_autoindex", schema.get("use_autoindex")),
-        ]
-
-        # Check settings section
-        if isinstance(schema.get("settings"), dict):
-            settings = schema["settings"]
-            autoindex_candidates.extend(
-                [
-                    ("settings.autoindex", settings.get("autoindex")),
-                    ("settings.enable_autoindex", settings.get("enable_autoindex")),
-                    ("settings.use_autoindex", settings.get("use_autoindex")),
-                ]
-            )
-
-        # Find all non-None values
-        found_candidates = [
-            (key, value) for key, value in autoindex_candidates if value is not None
-        ]
-
-        # If multiple autoindex settings found, raise error
-        if len(found_candidates) > 1:
-            keys_found = [key for key, _ in found_candidates]
-            raise SchemaConversionError(
-                f"Multiple autoindex settings found: {', '.join(keys_found)}. "
-                f"Please specify only one autoindex setting."
-            )
-
-        # If no autoindex setting found, default to False
-        if not found_candidates:
-            return False
-
-        # Get the single autoindex value
-        key, autoindex = found_candidates[0]
-
-        # Only accept boolean values - reject everything else
-        if isinstance(autoindex, bool):
-            return autoindex
-
-        # Reject any other type
-        raise SchemaConversionError(
-            f"Invalid autoindex value '{autoindex}' (type: "
-            f"{type(autoindex).__name__}) for key '{key}'. Expected boolean value "
-            f"(true or false)"
-        )
+        return self._autoindex

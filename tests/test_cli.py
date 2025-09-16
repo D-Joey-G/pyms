@@ -4,23 +4,7 @@ import pytest
 
 from typer.testing import CliRunner
 
-from pyamlvus.cli import _split_messages, app
-
-
-@pytest.mark.unit
-def test_split_messages_groups_by_prefix():
-    messages = [
-        "WARNING: first warning",
-        "INFO: heads up",
-        "ERROR: something failed",
-        "Trailing spaces   ",
-    ]
-
-    errors, warnings, infos = _split_messages(messages)
-
-    assert errors == ["ERROR: something failed", "Trailing spaces"]
-    assert warnings == ["WARNING: first warning"]
-    assert infos == ["INFO: heads up"]
+from pyamlvus.cli import app
 
 
 @pytest.mark.unit
@@ -50,5 +34,5 @@ def test_validate_command_handles_info_messages(tmp_path):
     result = runner.invoke(app, ["validate", str(schema_file)])
 
     assert result.exit_code == 0
-    assert "INFO:" in result.stdout
+    assert "ℹ Schema has 1 info message" in result.stdout
     assert "✗ Schema has" not in result.stdout

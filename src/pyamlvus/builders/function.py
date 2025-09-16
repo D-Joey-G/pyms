@@ -145,6 +145,7 @@ class FunctionBuilder:
 
             adjusted_indexes.append(idx_copy)
 
-        return validator.validate_function_index_relationships(
+        messages = validator.validate_function_index_relationships(
             functions, adjusted_indexes
         )
+        return [message.as_prefixed() for message in messages]

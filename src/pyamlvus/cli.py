@@ -14,30 +14,6 @@ from rich.table import Table
 from pyamlvus import SchemaLoader, validate_schema_file
 from pyamlvus.exceptions import SchemaParseError
 
-
-def _split_messages(messages: list[str]) -> tuple[list[str], list[str], list[str]]:
-    """Group validation messages by severity based on a simple prefix convention."""
-
-    errors: list[str] = []
-    warnings: list[str] = []
-    infos: list[str] = []
-
-    for message in messages:
-        normalized = message.strip()
-        prefix = normalized.upper()
-
-        if prefix.startswith("WARNING"):
-            warnings.append(normalized)
-        elif prefix.startswith("INFO"):
-            infos.append(normalized)
-        elif prefix.startswith("ERROR"):
-            errors.append(normalized)
-        else:
-            errors.append(normalized)
-
-    return errors, warnings, infos
-
-
 app = typer.Typer(
     name="pyamlvus",
     help="CLI tools for Milvus YAML schema management",
@@ -60,9 +36,9 @@ def validate(
     try:
         console.print(f"Validating [blue]{schema_file}[/blue]...")
 
-        messages = validate_schema_file(schema_file)
+        result = validate_schema_file(schema_file)
 
-        if not messages:
+        if not result.messages:
             console.print("[green]✓ Schema is valid![/green]")
 
             if verbose:
@@ -79,28 +55,26 @@ def validate(
                     console.print(f"  Settings: {list(loader.settings.keys())}")
 
         else:
-            actual_errors, warnings, infos = _split_messages(messages)
+            if result.errors:
+                console.print(f"[red]✗ Schema has {len(result.errors)} error(s):[/red]")
+                for error in result.errors:
+                    console.print(f"  [red]• {error.text}[/red]")
 
-            if actual_errors:
-                console.print(f"[red]✗ Schema has {len(actual_errors)} error(s):[/red]")
-                for error in actual_errors:
-                    console.print(f"  [red]• {error}[/red]")
-
-            if warnings:
+            if result.warnings:
                 console.print(
-                    f"[yellow]⚠ Schema has {len(warnings)} warning(s):[/yellow]"
+                    f"[yellow]⚠ Schema has {len(result.warnings)} warning(s):[/yellow]"
                 )
-                for warning in warnings:
-                    console.print(f"  [yellow]• {warning}[/yellow]")
+                for warning in result.warnings:
+                    console.print(f"  [yellow]• {warning.text}[/yellow]")
 
-            if infos:
+            if result.infos:
                 console.print(
-                    f"[cyan]i Schema has {len(infos)} info message(s):[/cyan]"
+                    f"[cyan]ℹ Schema has {len(result.infos)} info message(s):[/cyan]"
                 )
-                for info in infos:
-                    console.print(f"  [cyan]• {info}[/cyan]")
+                for info in result.infos:
+                    console.print(f"  [cyan]• {info.text}[/cyan]")
 
-            if actual_errors:
+            if result.has_errors():
                 raise typer.Exit(1)
 
     except SchemaParseError as e:

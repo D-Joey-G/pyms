@@ -18,6 +18,7 @@ from ..types import (
     VALID_INDEX_TYPES,
 )
 from .base import BaseValidator
+from .result import ValidationMessage, ValidationSeverity
 
 
 class IndexValidator(BaseValidator):
@@ -257,7 +258,7 @@ class IndexValidator(BaseValidator):
 
     def get_index_warnings(
         self, all_field_names: set[str], indexes: list[dict[str, Any]]
-    ) -> list[str]:
+    ) -> list[ValidationMessage]:
         """Get warnings for missing or suboptimal indexes.
 
         Args:
@@ -267,7 +268,7 @@ class IndexValidator(BaseValidator):
         Returns:
             list of warning messages
         """
-        warnings = []
+        warnings: list[ValidationMessage] = []
 
         # Get indexed fields
         indexed_fields = {idx.get("field") for idx in indexes if idx.get("field")}
@@ -285,9 +286,14 @@ class IndexValidator(BaseValidator):
             }:
                 if field_name not in indexed_fields:
                     warnings.append(
-                        f"WARNING: {field_type.upper()} field '{field_name}' has no "
-                        f"index defined. "
-                        "This will result in slow queries. Consider adding an index."
+                        ValidationMessage(
+                            ValidationSeverity.WARNING,
+                            (
+                                f"{field_type.upper()} field '{field_name}' has no "
+                                "index defined. This will result in slow queries. "
+                                "Consider adding an index."
+                            ),
+                        )
                     )
 
         # Check for suboptimal index choices
@@ -303,10 +309,14 @@ class IndexValidator(BaseValidator):
                 recommended = RECOMMENDED_INDEX_TYPES.get(field_type)
                 if recommended and index_type != recommended.upper():
                     warnings.append(
-                        f"INFO: Field '{field_name}' uses '{index_type}' "
-                        f"index. "
-                        f"Consider '{recommended}' for better performance on "
-                        f"{field_type} fields."
+                        ValidationMessage(
+                            ValidationSeverity.INFO,
+                            (
+                                f"Field '{field_name}' uses '{index_type}' index. "
+                                f"Consider '{recommended}' for better performance on "
+                                f"{field_type} fields."
+                            ),
+                        )
                     )
 
         return warnings

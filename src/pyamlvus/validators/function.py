@@ -5,6 +5,7 @@ from typing import Any
 
 from ..exceptions import SchemaConversionError
 from .base import BaseValidator
+from .result import ValidationMessage, ValidationSeverity
 
 
 class FunctionValidator(BaseValidator):
@@ -295,7 +296,7 @@ class FunctionValidator(BaseValidator):
 
     def validate_function_index_relationships(
         self, functions: list[dict[str, Any]], indexes: list[dict[str, Any]]
-    ) -> list[str]:
+    ) -> list[ValidationMessage]:
         """Validate relationships between functions and indexes.
 
         Args:
@@ -305,7 +306,7 @@ class FunctionValidator(BaseValidator):
         Returns:
             list of warning/error messages
         """
-        messages = []
+        messages: list[ValidationMessage] = []
 
         # Get function output fields
         function_outputs = set()
@@ -335,17 +336,25 @@ class FunctionValidator(BaseValidator):
                 if not has_index:
                     if func_type == "BM25":
                         messages.append(
-                            f"WARNING: BM25 function output field '{field_name}' has "
-                            f"no index. "
-                            "BM25 functions require SPARSE_INVERTED_INDEX for optimal "
-                            "performance."
+                            ValidationMessage(
+                                ValidationSeverity.WARNING,
+                                (
+                                    f"BM25 function output field '{field_name}' has no "
+                                    "index. BM25 functions require "
+                                    "SPARSE_INVERTED_INDEX for optimal performance."
+                                ),
+                            )
                         )
                     else:
                         messages.append(
-                            f"WARNING: Function output field '{field_name}' has no "
-                            f"index. "
-                            "Consider adding an appropriate index for query "
-                            "performance."
+                            ValidationMessage(
+                                ValidationSeverity.WARNING,
+                                (
+                                    f"Function output field '{field_name}' has no "
+                                    "index. Consider adding an appropriate index for "
+                                    "query performance."
+                                ),
+                            )
                         )
 
                 # Check index type compatibility
@@ -357,9 +366,14 @@ class FunctionValidator(BaseValidator):
                             and index_type != "SPARSE_INVERTED_INDEX"
                         ):
                             messages.append(
-                                f"ERROR: BM25 function output field '{field_name}' "
-                                f"uses '{index_type}' index. "
-                                "BM25 functions require SPARSE_INVERTED_INDEX."
+                                ValidationMessage(
+                                    ValidationSeverity.ERROR,
+                                    (
+                                        f"BM25 function output field '{field_name}' "
+                                        "uses '{index_type}' index. "
+                                        "BM25 functions require SPARSE_INVERTED_INDEX."
+                                    ),
+                                )
                             )
 
         return messages
