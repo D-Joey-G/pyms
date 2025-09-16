@@ -1,5 +1,6 @@
 # YAML parsing logic for Milvus schemas
 import os
+import re
 
 from pathlib import Path
 from typing import Any
@@ -7,7 +8,10 @@ from typing import Any
 import yaml
 
 from .exceptions import SchemaParseError
-from .validators.utils import NAME_RE
+
+# Collection and alias names must start with a letter and contain only letters,
+# digits, and underscores.
+_NAME_RE = re.compile(r"^[a-zA-Z][a-zA-Z0-9_]*$")
 
 
 class SchemaLoader:
@@ -128,7 +132,7 @@ class SchemaLoader:
         # Collection name must start with a letter and contain only letters, digits,
         # and underscores
 
-        if not NAME_RE.match(name):
+        if not _NAME_RE.match(name):
             raise SchemaParseError(
                 f"Collection name '{name}' is invalid. Collection name must start with "
                 f"a letter and contain only letters, digits, and underscores",
@@ -154,7 +158,7 @@ class SchemaLoader:
         # Collection alias must start with a letter and contain only letters, digits,
         # and underscores
 
-        if not NAME_RE.match(alias):
+        if not _NAME_RE.match(alias):
             raise SchemaParseError(
                 f"Collection alias '{alias}' is invalid. Collection alias must start "
                 f"with a letter and contain only letters, digits, and underscores",

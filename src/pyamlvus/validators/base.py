@@ -55,43 +55,6 @@ class BaseValidator(ABC):
             )
         return data[field_name]
 
-    def validate_field_type(
-        self, value: Any, expected_type: type, field_name: str
-    ) -> None:
-        """Validate that a field has the expected type.
-
-        Args:
-            value: Value to check
-            expected_type: Expected type
-            field_name: Name of the field for error messages
-
-        Raises:
-            SchemaConversionError: If type doesn't match
-        """
-        if not isinstance(value, expected_type):
-            raise SchemaConversionError(
-                f"Field '{field_name}' must be of type {expected_type.__name__}, "
-                f"got {type(value).__name__}"
-            )
-
-    def validate_one_of(
-        self, value: Any, allowed_values: list[Any], field_name: str
-    ) -> None:
-        """Validate that a value is one of the allowed values.
-
-        Args:
-            value: Value to check
-            allowed_values: list of allowed values
-            field_name: Name of the field for error messages
-
-        Raises:
-            SchemaConversionError: If value is not in allowed list
-        """
-        if value not in allowed_values:
-            raise SchemaConversionError(
-                f"Field '{field_name}' must be one of {allowed_values}, got '{value}'"
-            )
-
     def validate_string_not_empty(self, value: str, field_name: str) -> None:
         """Validate that a string is not empty.
 
