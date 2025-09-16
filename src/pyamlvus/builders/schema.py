@@ -1,6 +1,3 @@
-# Main schema builder for pyamlvus
-# Orchestrates the building of complete CollectionSchema objects
-
 from typing import TYPE_CHECKING, Any
 
 from pymilvus import CollectionSchema
@@ -47,7 +44,6 @@ class SchemaBuilder:
         ensure_runtime_requirements(self.schema_dict)
         self._autoindex = resolve_autoindex_flag(self.schema_dict)
 
-        # Initialize specialized builders
         self.field_builder = FieldBuilder()
         self.index_builder = IndexBuilder(self)
         self.function_builder = FunctionBuilder(self)
@@ -66,7 +62,6 @@ class SchemaBuilder:
             fields = self._build_fields()
             description = self.schema_dict.get("description", "")
 
-            # Check for collection-level settings
             settings = self.schema_dict.get("settings", {})
             enable_dynamic_field = settings.get("enable_dynamic_field", False)
 
@@ -76,20 +71,17 @@ class SchemaBuilder:
                 enable_dynamic_field=enable_dynamic_field,
             )
 
-            # Verify schema integrity using PyMilvus built-in validation
             try:
                 schema.verify()
             except Exception as e:
                 raise SchemaConversionError(f"Schema validation failed: {e}") from e
 
-            # Validate indexes if any are defined
             if self.indexes:
                 for index_def in self.indexes:
                     self.validate_index_params(index_def)
 
             return schema
         except (UnsupportedTypeError, SchemaConversionError):
-            # Re-raise our custom exceptions without wrapping
             raise
         except Exception as e:
             raise SchemaConversionError(f"Failed to build CollectionSchema: {e}") from e
@@ -105,7 +97,6 @@ class SchemaBuilder:
         primary_field_count = 0
 
         for field_def in self.schema_dict["fields"]:
-            # Validate field parameters before building
             self.validate_field_params(field_def)
             field = self.field_builder.build_field(field_def)
             fields.append(field)
@@ -133,7 +124,6 @@ class SchemaBuilder:
         validator = FieldValidator()
         validator.validate(field_def)
 
-    # Delegate index-related methods to IndexBuilder
     def get_index_params(self, index_def: dict[str, Any]) -> dict[str, Any]:
         """Convert index definition to PyMilvus index_params format."""
         return self.index_builder.get_index_params(index_def)
@@ -154,7 +144,6 @@ class SchemaBuilder:
         """Get MilvusClient index parameters for this schema."""
         return self.index_builder.get_milvus_index_params(client)
 
-    # Delegate function-related methods to FunctionBuilder
     def validate_function(self, func_def: dict[str, Any]) -> None:
         """Validate function definition."""
         return self.function_builder.validate_function(func_def)
@@ -167,7 +156,6 @@ class SchemaBuilder:
         """Get warnings for function-index relationship issues."""
         return self.function_builder.get_function_index_warnings()
 
-    # Delegate other methods to original builder
     @property
     def indexes(self) -> list[dict[str, Any]]:
         """Get list of index definitions."""
@@ -185,7 +173,6 @@ class SchemaBuilder:
                 func_def.get("type") or func_def.get("function_type", "").upper()
             )
             if func_type == "BM25":
-                # Check various possible output field keys
                 output_fields = []
                 for key in ["output_field", "output_field_names", "output_fields"]:
                     value = func_def.get(key)

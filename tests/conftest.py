@@ -1,4 +1,3 @@
-# Shared pytest fixtures and configuration
 from pathlib import Path
 from typing import Any
 
@@ -102,11 +101,11 @@ fields:
     type: "int64"
     is_primary: true
     auto_id: false
-    
+
   - name: "username"
     type: "varchar"
     max_length: 100
-    
+
   - name: "embedding"
     type: "float_vector"
     dim: 768
@@ -124,7 +123,7 @@ name: "invalid_test"
 fields:
   - name: "bad_field"
     type: "unknown_type"
-  - name: "vector_no_dim" 
+  - name: "vector_no_dim"
     type: "float_vector"
 """
 
@@ -199,7 +198,6 @@ def invalid_field_definitions() -> dict[str, dict[str, Any]]:
     }
 
 
-# Utility functions for tests
 def assert_field_properties(
     field, expected_name: str, expected_dtype: DataType, **kwargs
 ):

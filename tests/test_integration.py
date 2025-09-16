@@ -1,4 +1,3 @@
-# Integration tests for end-to-end YAML to CollectionSchema conversion
 import pytest
 
 from pymilvus import CollectionSchema, DataType

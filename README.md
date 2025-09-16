@@ -1,13 +1,13 @@
-# pyamlvus
+# pyms
 
-A Python library for managing Milvus schemas through YAML configuration files.
+pyms (Python Yaml Milvus Schema) is a Python library for managing Milvus schemas through YAML configuration files.
 
 ## Quick Start
 
 **Load and validate schemas from YAML:**
 
 ```python
-from pyamlvus import load_schema, validate_schema_file
+from pyamlvus import load_schema, validate_schema_file, create_collection_from_yaml
 
 # Load schema from YAML file
 schema = load_schema("my_schema.yaml")
@@ -33,6 +33,12 @@ client = MilvusClient(...)
 client.create_collection(
     collection_name="my_collection",
     schema=schema
+)
+
+# Or create collection directly by passing client and path
+create_collection_from_yaml(
+    file_path="my_schema.yaml",
+    client=client
 )
 ```
 
@@ -98,7 +104,7 @@ YAML Schema → Parser → Validation → CollectionSchema → Milvus
 
 ```bash
 # Install with uv (when published)
-uv add pyamlvus
+uv add pyms
 
 # Development installation
 git clone https://github.com/D-Joey-G/pyamlvus
@@ -109,6 +115,20 @@ uv sync --all-groups
 ## API Reference
 
 ### Core API
+
+**Create collection from YAML file:**
+
+```python
+from pymilvus import MilvusClient
+from pyms import create_collection_from_yaml
+
+client = MilvusClient(...)
+
+create_collection_from_yaml(
+    file_path="my_schema.yaml",
+    client=client
+)
+```
 
 **Load schema from YAML file:**
 
@@ -159,7 +179,6 @@ from pyamlvus import SchemaBuilder
 builder = SchemaBuilder(schema_dict)
 collection_schema = builder.build()
 
-# Advanced: Get index parameters for MilvusClient
 index_params = builder.get_milvus_index_params(client)
 ```
 
@@ -236,18 +255,6 @@ fields:
       type: "english"          # Optional: specify analyzer
 ```
 
-Use in queries with `TEXT_MATCH` expressions:
-
-```python
-# Search for documents containing specific keywords
-filter = "TEXT_MATCH(description, 'machine learning')"
-results = client.search(
-    collection_name="my_collection",
-    filter=filter,
-    # ... other search parameters
-)
-```
-
 ## Collection Settings
 
 ```yaml
@@ -297,14 +304,6 @@ tests/
 - **Type Safety**: Full type mappings to PyMilvus data types with parameter validation
 - **Schema Building**: Convert YAML schemas to PyMilvus CollectionSchema objects
 - **Error Handling**: Structured exceptions with helpful error messages
-- **Text Match Support**: Enable keyword matching on VARCHAR fields for precise text retrieval
-
-### Development Standards
-
-- **Code Quality**: All code must pass `ruff` formatting and linting
-- **Type Safety**: Use modern Python type hints throughout
-- **Testing**: Write tests for new features
-- **Documentation**: Update docstrings and examples
 
 ## License
 

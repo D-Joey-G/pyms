@@ -1,11 +1,7 @@
-# Type mappings for pyamlvus
-# Maps YAML field types to PyMilvus DataType objects
-
 from pymilvus import DataType
 
 from .compat import OPTIONAL_TYPE_SUPPORT
 
-# YAML type to PyMilvus DataType mapping
 TYPE_MAPPING = {
     "int8": DataType.INT8,
     "int16": DataType.INT16,

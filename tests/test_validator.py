@@ -1,4 +1,3 @@
-# Tests for schema validation functionality
 import pytest
 import yaml
 

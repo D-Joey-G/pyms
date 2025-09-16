@@ -1,6 +1,3 @@
-# Custom exceptions for pyamlvus
-
-
 class MilvusYamlError(Exception):
     """Base exception for all pyamlvus errors."""
 

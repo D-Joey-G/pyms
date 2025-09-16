@@ -1,6 +1,3 @@
-# Field validation logic for pyamlvus
-# Handles validation of individual field definitions
-
 from typing import Any
 
 from ..exceptions import SchemaConversionError, UnsupportedTypeError
@@ -12,7 +9,6 @@ from ..types import (
 )
 from .base import BaseValidator
 
-# Validation ranges and helper functions
 VECTOR_DIM_RANGES = {
     "float_vector": (1, 32768),  # Milvus limits
     "float16_vector": (1, 32768),
@@ -96,7 +92,6 @@ class FieldValidator(BaseValidator):
         Raises:
             SchemaConversionError: If field definition is invalid
         """
-        # Validate required fields
         name = item.get("name")
         if name is None:
             raise SchemaConversionError("Field missing required 'name' attribute")
@@ -107,23 +102,18 @@ class FieldValidator(BaseValidator):
                 f"Field '{name}' missing required 'type' attribute"
             )
 
-        # Validate field name
         self.validate_string_not_empty(name, "name")
         self._validate_field_name_format(name)
 
-        # Validate field type
         self._validate_field_type(field_type, name)
 
-        # Validate type-specific parameters
         self._validate_type_specific_params(item, field_type, name)
 
-        # Validate nullable flag if present
         if "nullable" in item and not isinstance(item.get("nullable"), bool):
             raise SchemaConversionError(
                 f"Field '{name}': 'nullable' must be a boolean value"
             )
 
-        # Validate enable_match flag if present
         if "enable_match" in item and not isinstance(item.get("enable_match"), bool):
             raise SchemaConversionError(
                 f"Field '{name}': 'enable_match' must be a boolean value"
@@ -206,7 +196,6 @@ class FieldValidator(BaseValidator):
         }:
             self._validate_vector_params(field_def, field_type, field_name)
         elif field_type == "sparse_float_vector":
-            # sparse_float_vector doesn't require dim parameter
             pass
         elif field_type == "array":
             self._validate_array_params(field_def, field_name)
@@ -231,7 +220,6 @@ class FieldValidator(BaseValidator):
         max_length = field_def["max_length"]
         self.validate_positive_integer(max_length, f"{field_name}.max_length")
 
-        # Use the centralized validation function
         validate_varchar_length(field_name, max_length)
 
     def _validate_vector_params(
@@ -255,7 +243,6 @@ class FieldValidator(BaseValidator):
         dim = field_def["dim"]
         self.validate_positive_integer(dim, f"{field_name}.dim")
 
-        # Use the centralized validation function
         validate_vector_dim(field_name, dim, field_type)
 
     def _validate_array_params(
@@ -280,7 +267,6 @@ class FieldValidator(BaseValidator):
                 f"Array field '{field_name}' missing required 'max_capacity' parameter"
             )
 
-        # Validate element_type is supported
         element_type = field_def["element_type"]
         if element_type not in TYPE_MAPPING:
             raise UnsupportedTypeError(
@@ -288,9 +274,7 @@ class FieldValidator(BaseValidator):
                 f"'{field_name}'"
             )
 
-        # Validate max_capacity
         max_capacity = field_def["max_capacity"]
         self.validate_positive_integer(max_capacity, f"{field_name}.max_capacity")
 
-        # Use the centralized validation function
         validate_array_params(field_name, max_capacity)

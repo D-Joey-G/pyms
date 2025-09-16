@@ -1,6 +1,3 @@
-# Field building logic for pyamlvus
-# Handles conversion of YAML field definitions to PyMilvus FieldSchema objects
-
 from typing import Any
 
 from pymilvus import FieldSchema
@@ -41,7 +38,6 @@ class FieldBuilder:
                 f"Unsupported field type '{type_str}' for field '{name}'"
             )
 
-        # Build kwargs for FieldSchema
         kwargs = FieldBuilder._build_field_kwargs(field_def, name, type_str)
 
         try:
@@ -71,24 +67,18 @@ class FieldBuilder:
             "description": field_def.get("description", ""),
         }
 
-        # Handle primary key
         if field_def.get("is_primary", False):
             kwargs["is_primary"] = True
-            # auto_id defaults to False if not specified for primary keys
             kwargs["auto_id"] = field_def.get("auto_id", False)
 
-        # Handle type-specific parameters
         params = FieldBuilder._build_type_params(field_def, type_str, name)
 
-        # For VARCHAR fields, max_length is a direct parameter, not in params
         if type_str == "varchar":
             max_length = field_def.get("max_length")
             if max_length is not None:
                 kwargs["max_length"] = max_length
-                # Remove max_length from params if it exists
                 params.pop("max_length", None)
 
-        # For vector fields, dim is a direct parameter, not in params
         elif type_str in {
             "float_vector",
             "float16_vector",
@@ -100,11 +90,8 @@ class FieldBuilder:
             dim = field_def.get("dim")
             if dim is not None:
                 kwargs["dim"] = dim
-                # Remove dim from params if it exists
                 params.pop("dim", None)
 
-        # For array fields, element_type, max_length, and max_capacity are direct
-        # parameters
         elif type_str == "array":
             element_type_str = field_def.get("element_type")
             if element_type_str and element_type_str in TYPE_MAPPING:
@@ -116,20 +103,16 @@ class FieldBuilder:
                 kwargs["max_capacity"] = max_capacity
                 params.pop("max_capacity", None)
 
-            # For varchar element arrays, max_length is also a direct parameter
             if element_type_str == "varchar":
                 max_length = field_def.get("max_length")
                 if max_length is not None:
                     kwargs["max_length"] = max_length
                     params.pop("max_length", None)
 
-        # Text analysis flags (needed for BM25 input VARCHAR fields)
         if "enable_analyzer" in field_def:
             kwargs["enable_analyzer"] = bool(field_def.get("enable_analyzer"))
-        # Text match flag (needed for TEXT_MATCH expressions)
         if "enable_match" in field_def:
             kwargs["enable_match"] = bool(field_def.get("enable_match"))
-        # Default analyzer params when analyzer is enabled and params are missing
         if kwargs.get("enable_analyzer") is True:
             provided_params = field_def.get("analyzer_params")
             if not provided_params:
@@ -139,7 +122,6 @@ class FieldBuilder:
         if "multi_analyzer_params" in field_def:
             kwargs["multi_analyzer_params"] = field_def.get("multi_analyzer_params")
 
-        # Nullable support
         if "nullable" in field_def:
             kwargs["nullable"] = bool(field_def.get("nullable"))
 
@@ -182,7 +164,6 @@ class FieldBuilder:
                 params["dim"] = dim
 
         elif type_str == "array":
-            # Handle array-specific parameters
             element_type_str = field_def.get("element_type")
             if element_type_str:
                 if element_type_str not in TYPE_MAPPING:
@@ -195,9 +176,5 @@ class FieldBuilder:
             max_capacity = field_def.get("max_capacity")
             if max_capacity is not None:
                 params["max_capacity"] = max_capacity
-
-            # Element-specific parameters (like max_length) are handled as direct
-            # parameters
-            # in the main _build_field_kwargs method, not in params
 
         return params

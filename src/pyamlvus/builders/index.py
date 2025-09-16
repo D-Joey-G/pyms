@@ -1,12 +1,9 @@
-# Index building logic for pyamlvus
-# Handles conversion of YAML index definitions to PyMilvus index parameters
-
 from typing import TYPE_CHECKING, Any, Protocol
 
 from ..exceptions import SchemaConversionError
 
 if TYPE_CHECKING:
-    from pymilvus import MilvusClient  # type: ignore[import]
+    from pymilvus import MilvusClient
 
 
 class SchemaBuilderProtocol(Protocol):
@@ -54,7 +51,6 @@ class IndexBuilder:
         Raises:
             SchemaConversionError: If index definition is invalid
         """
-        # Validate index params strictly before constructing dictionary
         self.validate_index_params(index_def)
 
         field_name = index_def.get("field")
@@ -63,14 +59,12 @@ class IndexBuilder:
 
         index_type = index_def.get("type")
         if not index_type:
-            # Special handling for BM25 function output fields
             if self.schema_builder.is_bm25_function_output_field(field_name):
                 index_type = "SPARSE_INVERTED_INDEX"
                 index_def["type"] = index_type
                 # Ensure BM25 metric is set for BM25 function output fields
                 if "metric" not in index_def:
                     index_def["metric"] = "BM25"
-            # Use AUTOINDEX for other fields if autoindex is enabled
             elif self.schema_builder._autoindex:
                 index_type = "AUTOINDEX"
                 index_def["type"] = index_type
@@ -94,16 +88,12 @@ class IndexBuilder:
             # metric
             index_params["metric_type"] = "BM25"
 
-        # Add params if specified, or set defaults for SPARSE_INVERTED_INDEX
         params: dict[str, Any] = index_def.get("params") or {}
 
-        # Set defaults for SPARSE_INVERTED_INDEX if not already present
         if index_type == "SPARSE_INVERTED_INDEX":
-            # Always set the inverted_index_algo default if not specified
             if "inverted_index_algo" not in params:
                 params["inverted_index_algo"] = "DAAT_MAXSCORE"
 
-            # Add BM25-specific params for BM25 function output fields if not specified
             if self.schema_builder.is_bm25_function_output_field(field_name):
                 if "bm25_k1" not in params:
                     params["bm25_k1"] = 1.2
@@ -165,20 +155,16 @@ class IndexBuilder:
         index_params = client.prepare_index_params()
 
         for index_def in self.schema_builder.indexes:
-            # Get the basic index params
             index_dict = self.get_index_params(index_def)
 
-            # Extract parameters for MilvusClient.add_index()
             kwargs = {
                 "field_name": index_def["field"],
                 "index_type": index_dict["index_type"],
             }
 
-            # Add metric_type if present
             if "metric_type" in index_dict:
                 kwargs["metric_type"] = index_dict["metric_type"]
 
-            # Add params if present
             if "params" in index_dict:
                 kwargs["params"] = index_dict["params"]
 

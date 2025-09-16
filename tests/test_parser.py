@@ -1,5 +1,3 @@
-# Tests for YAML parser module
-
 import pytest
 
 from pyamlvus.exceptions import SchemaParseError

@@ -1,6 +1,3 @@
-# Type system module for pyamlvus
-# Provides type mappings, constants, and type-related utilities
-
 from .compat import (
     OPTIONAL_INDEX_REQUIREMENTS,
     OPTIONAL_INDEX_SUPPORT,

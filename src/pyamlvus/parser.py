@@ -1,4 +1,3 @@
-# YAML parsing logic for Milvus schemas
 import os
 import re
 
@@ -129,9 +128,6 @@ class SchemaLoader:
                 "Collection name cannot be empty", file_path=str(self.file_path)
             )
 
-        # Collection name must start with a letter and contain only letters, digits,
-        # and underscores
-
         if not _NAME_RE.match(name):
             raise SchemaParseError(
                 f"Collection name '{name}' is invalid. Collection name must start with "
@@ -139,7 +135,6 @@ class SchemaLoader:
                 file_path=str(self.file_path),
             )
 
-        # Cannot start with underscore (additional validation)
         if name.startswith("_"):
             raise SchemaParseError(
                 f"Collection name '{name}' cannot start with an underscore",
@@ -155,9 +150,6 @@ class SchemaLoader:
         Raises:
             SchemaParseError: If alias is invalid
         """
-        # Collection alias must start with a letter and contain only letters, digits,
-        # and underscores
-
         if not _NAME_RE.match(alias):
             raise SchemaParseError(
                 f"Collection alias '{alias}' is invalid. Collection alias must start "

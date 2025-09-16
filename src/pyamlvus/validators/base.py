@@ -1,6 +1,3 @@
-# Base validator classes for pyamlvus
-# Provides common validation infrastructure and patterns
-
 from abc import ABC, abstractmethod
 from typing import Any
 

@@ -82,7 +82,6 @@ markers = [
 ]
 
 [tool.ruff]
-# Exclude a variety of commonly ignored directories.
 exclude = [
     ".bzr",
     ".direnv",
@@ -112,7 +111,6 @@ exclude = [
     "venv",
 ]
 
-# Same as Black.
 line-length = 88
 indent-width = 4
 
@@ -125,23 +123,15 @@ target-version = "py310"
 select = ["E", "F", "I", "UP", "C4",]
 ignore = []
 
-# Allow fix for all enabled rules (when `--fix`) is provided.
 fixable = ["ALL"]
 unfixable = []
 
-# Allow unused variables when underscore-prefixed.
 dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 
 [tool.ruff.format]
-# Like Black, use double quotes for strings.
 quote-style = "double"
-
-# Like Black, respect magic trailing commas.
 skip-magic-trailing-comma = false
-
-# Like Black, automatically detect the appropriate line ending.
 line-ending = "auto"
-
 docstring-code-format = true
 
 [dependency-groups]
@@ -156,7 +146,6 @@ nb = [
 ]
 
 [tool.ruff.lint.isort]
-# Mark your own packages as first-party so Ruff places them correctly.
 known-first-party = ["pyamlvus"]
 combine-as-imports = true
 lines-between-types = 1

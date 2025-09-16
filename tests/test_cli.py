@@ -34,5 +34,5 @@ def test_validate_command_handles_info_messages(tmp_path):
     result = runner.invoke(app, ["validate", str(schema_file)])
 
     assert result.exit_code == 0
-    assert "ℹ Schema has 1 info message" in result.stdout
+    assert "i Schema has 1 info message" in result.stdout
     assert "✗ Schema has" not in result.stdout

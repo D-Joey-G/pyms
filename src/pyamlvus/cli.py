@@ -42,7 +42,6 @@ def validate(
             console.print("[green]✓ Schema is valid![/green]")
 
             if verbose:
-                # Show schema info
                 loader = SchemaLoader(schema_file)
                 console.print("\n[bold]Schema Info:[/bold]")
                 console.print(f"  Name: {loader.name}")
@@ -69,7 +68,7 @@ def validate(
 
             if result.infos:
                 console.print(
-                    f"[cyan]ℹ Schema has {len(result.infos)} info message(s):[/cyan]"
+                    f"[cyan]i Schema has {len(result.infos)} info message(s):[/cyan]"
                 )
                 for info in result.infos:
                     console.print(f"  [cyan]• {info.text}[/cyan]")
@@ -105,7 +104,6 @@ def info(
         if loader.alias:
             console.print(f"[bold]Alias:[/bold] {loader.alias}")
 
-        # Fields table
         if loader.fields:
             console.print(f"\n[bold]Fields ({len(loader.fields)}):[/bold]")
 
@@ -137,7 +135,6 @@ def info(
 
             console.print(table)
 
-        # Indexes
         if loader.indexes:
             console.print(f"\n[bold]Indexes ({len(loader.indexes)}):[/bold]")
 
@@ -162,7 +159,6 @@ def info(
 
             console.print(index_table)
 
-        # Functions
         if loader.functions:
             console.print(f"\n[bold]Functions ({len(loader.functions)}):[/bold]")
 

@@ -1,6 +1,3 @@
-# Index validation logic for pyamlvus
-# Handles validation of index definitions
-
 from typing import Any
 
 from ..exceptions import SchemaConversionError
@@ -45,30 +42,24 @@ class IndexValidator(BaseValidator):
         Raises:
             SchemaConversionError: If index definition is invalid
         """
-        # Validate required fields
         field_name = self.validate_required_field(item, "field", "index")
 
-        # Get index type (may be auto-determined)
         index_type = item.get("type")
 
-        # Validate field exists
         if field_name not in self.field_types:
             raise SchemaConversionError(f"Index refers to unknown field '{field_name}'")
 
         field_type = self.field_types[field_name]
 
         if index_type:
-            index_type = index_type.upper()  # Normalize to uppercase
+            index_type = index_type.upper()
             self._validate_index_type(index_type, field_type, field_name)
         else:
-            # Will be auto-determined later
             pass
 
-        # Validate metric if provided
         if "metric" in item:
             self._validate_metric(item["metric"], field_type, field_name, index_type)
 
-        # Validate parameters (always check required params even if no params provided)
         params = item.get("params", {})
         self._validate_index_params(params, index_type or "", field_name)
 
@@ -85,7 +76,6 @@ class IndexValidator(BaseValidator):
         Raises:
             SchemaConversionError: If index type is not valid for field type
         """
-        # If the field type itself is optional and unsupported, surface the field error.
         if (
             field_type in OPTIONAL_TYPE_SUPPORT
             and not OPTIONAL_TYPE_SUPPORT[field_type]
@@ -97,7 +87,6 @@ class IndexValidator(BaseValidator):
 
         valid_types = VALID_INDEX_TYPES.get(field_type, set())
 
-        # Normalize to uppercase for case-insensitive comparison
         index_type_upper = index_type.upper()
 
         req = OPTIONAL_INDEX_REQUIREMENTS.get(index_type_upper)
@@ -107,7 +96,6 @@ class IndexValidator(BaseValidator):
                 f"({req}). Current pymilvus version: {PYMILVUS_VERSION}."
             )
 
-        # Check if type is valid (case-insensitive)
         if index_type_upper not in valid_types:
             recommended = RECOMMENDED_INDEX_TYPES.get(field_type)
             suggestion = f" Recommended: {recommended}" if recommended else ""
@@ -163,7 +151,6 @@ class IndexValidator(BaseValidator):
                     f"Allowed: {sorted(BINARY_METRICS)}"
                 )
         elif field_type == "sparse_float_vector":
-            # Sparse vectors typically use BM25 or IP
             if metric_upper not in {"BM25", "IP"}:
                 raise SchemaConversionError(
                     f"Invalid metric '{metric}' for sparse_float_vector field "
@@ -190,7 +177,6 @@ class IndexValidator(BaseValidator):
                 f"{type(params)}"
             )
 
-        # Check required parameters
         required = REQUIRED_PARAMS.get(index_type, set())
         missing = required - set(params.keys())
         if missing:
@@ -199,7 +185,6 @@ class IndexValidator(BaseValidator):
                 f"parameters: {sorted(missing)}"
             )
 
-        # Validate parameter types and values
         for param_name, param_value in params.items():
             self._validate_index_param(param_name, param_value, index_type, field_name)
 
@@ -217,7 +202,6 @@ class IndexValidator(BaseValidator):
         Raises:
             SchemaConversionError: If parameter is invalid
         """
-        # HNSW parameters
         if index_type == "HNSW":
             if param_name in {"M", "efConstruction"}:
                 if not isinstance(param_value, int) or param_value <= 0:
@@ -232,7 +216,6 @@ class IndexValidator(BaseValidator):
                         "Recommended: 4-100"
                     )
 
-        # IVF parameters
         elif index_type in {"IVF_FLAT", "IVF_SQ8", "IVF_PQ"}:
             if param_name == "nlist":
                 if not isinstance(param_value, int) or param_value <= 0:
@@ -247,7 +230,6 @@ class IndexValidator(BaseValidator):
                         "Recommended: 100-10000"
                     )
 
-        # PQ-specific parameters
         if index_type == "IVF_PQ":
             if param_name == "m":
                 if not isinstance(param_value, int) or param_value <= 0:
@@ -270,10 +252,8 @@ class IndexValidator(BaseValidator):
         """
         warnings: list[ValidationMessage] = []
 
-        # Get indexed fields
         indexed_fields = {idx.get("field") for idx in indexes if idx.get("field")}
 
-        # Check for unindexed vector fields
         for field_name in all_field_names:
             field_type = self.field_types.get(field_name, "")
             if field_type in {
@@ -296,7 +276,6 @@ class IndexValidator(BaseValidator):
                         )
                     )
 
-        # Check for suboptimal index choices
         for index_def in indexes:
             field_name = index_def.get("field")
             if not field_name:

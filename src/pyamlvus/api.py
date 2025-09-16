@@ -1,6 +1,3 @@
-# High-level API functions for pyamlvus
-# Provides convenient one-liner functions for common operations
-
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 

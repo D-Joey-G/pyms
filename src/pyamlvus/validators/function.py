@@ -1,6 +1,3 @@
-# Function validation logic for pyamlvus
-# Handles validation of function definitions
-
 from typing import Any
 
 from ..exceptions import SchemaConversionError
@@ -32,19 +29,14 @@ class FunctionValidator(BaseValidator):
         Raises:
             SchemaConversionError: If function definition is invalid
         """
-        # Validate required fields
         func_type = self.validate_required_field(item, "type", "function")
 
-        # Validate function type
         self._validate_function_type(func_type)
 
-        # Validate input fields
         self._validate_input_fields(item)
 
-        # Validate output field
         self._validate_output_field(item)
 
-        # Validate function-specific parameters
         self._validate_function_params(item, func_type)
 
     def _validate_function_type(self, func_type: str) -> None:
@@ -56,7 +48,6 @@ class FunctionValidator(BaseValidator):
         Raises:
             SchemaConversionError: If function type is not supported
         """
-        # Accept both canonical and common alias spellings
         token = "".join(ch for ch in str(func_type) if ch.isalnum()).upper()
         supported_aliases = {
             "BM25": "BM25",
@@ -82,7 +73,6 @@ class FunctionValidator(BaseValidator):
         Raises:
             SchemaConversionError: If input fields are invalid
         """
-        # Check various input field parameter names
         input_fields = None
         if "input_field_names" in func_def:
             input_fields = func_def["input_field_names"]
@@ -102,7 +92,6 @@ class FunctionValidator(BaseValidator):
                 "'field'."
             )
 
-        # Ensure it's a list or string
         if isinstance(input_fields, str):
             input_fields = [input_fields]
         elif not isinstance(input_fields, list):
@@ -110,14 +99,12 @@ class FunctionValidator(BaseValidator):
                 f"Input fields must be a string or list, got {type(input_fields)}"
             )
 
-        # Validate each input field exists
         for field_name in input_fields:
             if field_name not in self.field_names:
                 raise SchemaConversionError(
                     f"Function input field '{field_name}' does not exist in schema"
                 )
 
-            # Validate field type compatibility
             field_type = self.field_types.get(field_name)
             if field_type not in {"varchar", "json"}:
                 raise SchemaConversionError(
@@ -135,7 +122,6 @@ class FunctionValidator(BaseValidator):
         Raises:
             SchemaConversionError: If output field is invalid
         """
-        # Check various output field parameter names
         output_field = None
         if "output_field_names" in func_def:
             output_field = func_def["output_field_names"]
@@ -148,7 +134,6 @@ class FunctionValidator(BaseValidator):
                 "Use 'output_field_names' or 'output_field'."
             )
 
-        # Ensure it's a string or list (PyMilvus accepts both)
         if isinstance(output_field, str):
             output_fields = [output_field]
         elif isinstance(output_field, list):
@@ -167,7 +152,6 @@ class FunctionValidator(BaseValidator):
                 f"{type(output_field)}"
             )
 
-        # Validate output fields exist in schema
         for field_name in output_fields:
             if field_name not in self.field_names:
                 raise SchemaConversionError(
@@ -201,7 +185,6 @@ class FunctionValidator(BaseValidator):
         Raises:
             SchemaConversionError: If parameters are invalid
         """
-        # Text embedding functions typically need model specification
         if "params" not in func_def:
             raise SchemaConversionError(
                 "TEXT_EMBEDDING function missing required 'params' section"
@@ -213,7 +196,6 @@ class FunctionValidator(BaseValidator):
                 "TEXT_EMBEDDING function 'params' must be a dictionary"
             )
 
-        # Check for model specification
         if "model" not in params:
             raise SchemaConversionError(
                 "TEXT_EMBEDDING function missing required 'model' parameter"
@@ -234,7 +216,6 @@ class FunctionValidator(BaseValidator):
         Raises:
             SchemaConversionError: If parameters are invalid
         """
-        # Ensure input fields have text analyzer enabled
         input_fields = None
         for key in (
             "input_field_names",
@@ -254,7 +235,6 @@ class FunctionValidator(BaseValidator):
                 "'input_field_names' or 'input_field'."
             )
 
-        # Map field name to its definition for quick lookup
         defs_by_name = {f.get("name"): f for f in self.field_definitions}
         for fname in input_fields:
             fdef = defs_by_name.get(fname) or {}
@@ -264,7 +244,6 @@ class FunctionValidator(BaseValidator):
                     f"enable_analyzer: true"
                 )
 
-        # BM25 functions have optional parameters
         if "params" in func_def:
             params = func_def["params"]
             if not isinstance(params, dict):
@@ -272,7 +251,6 @@ class FunctionValidator(BaseValidator):
                     "BM25 function 'params' must be a dictionary"
                 )
 
-            # Validate BM25-specific parameters
             valid_params = {"k1", "b"}
             for param_name in params:
                 if param_name not in valid_params:
@@ -308,7 +286,6 @@ class FunctionValidator(BaseValidator):
         """
         messages: list[ValidationMessage] = []
 
-        # Get function output fields
         function_outputs = set()
         for func in functions:
             output_field = func.get("output_field_names") or func.get("output_field")
@@ -317,7 +294,6 @@ class FunctionValidator(BaseValidator):
             elif isinstance(output_field, list):
                 function_outputs.update(output_field)
 
-        # Check that function output fields have appropriate indexes
         for func in functions:
             func_type = func.get("type", "").upper()
             output_field = func.get("output_field_names") or func.get("output_field")
@@ -330,7 +306,6 @@ class FunctionValidator(BaseValidator):
                 continue
 
             for field_name in output_fields:
-                # Check if field has an index
                 has_index = any(idx.get("field") == field_name for idx in indexes)
 
                 if not has_index:
@@ -357,7 +332,6 @@ class FunctionValidator(BaseValidator):
                             )
                         )
 
-                # Check index type compatibility
                 for idx in indexes:
                     if idx.get("field") == field_name:
                         index_type = idx.get("type", "").upper()

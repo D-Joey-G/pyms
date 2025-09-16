@@ -1,6 +1,3 @@
-# Function building logic for pyamlvus
-# Handles conversion of YAML function definitions to PyMilvus Function objects
-
 from typing import TYPE_CHECKING, Any
 
 from pymilvus import Function
@@ -35,7 +32,6 @@ class FunctionBuilder:
         functions: list[Function] = []
         func_defs = self.schema_builder.functions or []
 
-        # Validate all definitions first for better error messages
         for func_def in func_defs:
             self.validate_function(func_def)
 
@@ -44,14 +40,11 @@ class FunctionBuilder:
 
         def _normalize(defn: dict[str, Any]) -> dict[str, Any]:
             d = dict(defn)
-            # Normalize type key and map to PyMilvus FunctionType enum
             if "function_type" not in d and "type" in d:
                 d["function_type"] = d.pop("type")
 
-            # Accept common aliases and case/underscore variations
             if "function_type" in d:
                 ft_raw = d["function_type"]
-                # If already an enum or int, keep as-is; else map from string
                 if isinstance(ft_raw, FunctionType):
                     pass
                 elif isinstance(ft_raw, int):
@@ -76,8 +69,6 @@ class FunctionBuilder:
                     # Unexpected type; let pymilvus raise
                     pass
 
-            # Map input fields - PyMilvus expects string for single field, list for
-            # multiple
             if "input_field_names" not in d:
                 if "input_fields" in d:
                     d["input_field_names"] = d.pop("input_fields")
@@ -124,9 +115,6 @@ class FunctionBuilder:
         validator = FunctionValidator(
             set(self.schema_builder._field_types.keys()), field_definitions
         )
-        # If autoindex is enabled, normalize missing index types before validation.
-        # Also normalize BM25 function output fields to SPARSE_INVERTED_INDEX when
-        # type is missing.
         functions = self.schema_builder.functions
         raw_indexes = self.schema_builder.indexes
 
