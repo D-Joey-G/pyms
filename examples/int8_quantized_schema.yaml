@@ -32,7 +32,7 @@ indexes:
   - field: "is_active"
     type: "BITMAP"
   - field: "score"
-    type: "STL_SORT"
+    type: "INVERTED"
 
 settings:
   enable_dynamic_field: false
