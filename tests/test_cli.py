@@ -4,7 +4,7 @@ import pytest
 
 from typer.testing import CliRunner
 
-from pyamlvus.cli import app
+from pyms.cli import app
 
 
 @pytest.mark.unit

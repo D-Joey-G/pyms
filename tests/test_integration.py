@@ -2,8 +2,8 @@ import pytest
 
 from pymilvus import CollectionSchema, DataType
 
-from pyamlvus import SchemaBuilder, SchemaLoader, validate_schema
-from pyamlvus.exceptions import SchemaConversionError, UnsupportedTypeError
+from pyms import SchemaBuilder, SchemaLoader, validate_schema
+from pyms.exceptions import SchemaConversionError, UnsupportedTypeError
 
 
 @pytest.mark.integration

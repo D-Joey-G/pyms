@@ -1,7 +1,7 @@
 import pytest
 import yaml
 
-from pyamlvus import validate_schema
+from pyms import validate_schema
 
 
 @pytest.mark.unit

@@ -4,9 +4,9 @@ import pytest
 
 from pymilvus import CollectionSchema, DataType
 
-from pyamlvus.builders.schema import SchemaBuilder
-from pyamlvus.exceptions import SchemaConversionError, UnsupportedTypeError
-from pyamlvus.types import TYPE_MAPPING
+from pyms.builders.schema import SchemaBuilder
+from pyms.exceptions import SchemaConversionError, UnsupportedTypeError
+from pyms.types import TYPE_MAPPING
 from tests.conftest import assert_field_properties, create_schema_dict
 
 
@@ -90,12 +90,12 @@ class TestSchemaBuilder:
         schema_dict["pymilvus"] = {"min_version": "99.0.0"}
 
         monkeypatch.setattr(
-            "pyamlvus.validators.schema.PYMILVUS_VERSION_INFO",
+            "pyms.validators.schema.PYMILVUS_VERSION_INFO",
             (2, 5, 0),
             raising=False,
         )
         monkeypatch.setattr(
-            "pyamlvus.validators.schema.PYMILVUS_VERSION", "2.5.0", raising=False
+            "pyms.validators.schema.PYMILVUS_VERSION", "2.5.0", raising=False
         )
 
         with pytest.raises(
@@ -111,12 +111,12 @@ class TestSchemaBuilder:
         schema_dict["pymilvus"] = {"version": "1.0.0"}
 
         monkeypatch.setattr(
-            "pyamlvus.validators.schema.PYMILVUS_VERSION_INFO",
+            "pyms.validators.schema.PYMILVUS_VERSION_INFO",
             (2, 6, 0),
             raising=False,
         )
         monkeypatch.setattr(
-            "pyamlvus.validators.schema.PYMILVUS_VERSION", "2.6.0", raising=False
+            "pyms.validators.schema.PYMILVUS_VERSION", "2.6.0", raising=False
         )
 
         with pytest.raises(

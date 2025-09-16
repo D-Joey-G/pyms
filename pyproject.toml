@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "pyamlvus"
+name = "pyms"
 version = "0.1.0"
 description = "Declarative Milvus schemas in YAML"
 readme = "README.md"
@@ -41,26 +41,26 @@ classifiers = [
     "Typing :: Typed",
 ]
 [project.urls]
-Homepage = "https://github.com/D-Joey-G/pyamlvus"
-Repository = "https://github.com/D-Joey-G/pyamlvus"
-Issues = "https://github.com/D-Joey-G/pyamlvus/issues"
-Documentation = "https://github.com/D-Joey-G/pyamlvus#readme"
+Homepage = "https://github.com/D-Joey-G/pyms"
+Repository = "https://github.com/D-Joey-G/pyms"
+Issues = "https://github.com/D-Joey-G/pyms/issues"
+Documentation = "https://github.com/D-Joey-G/pyms#readme"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/pyamlvus"]
+packages = ["src/pyms"]
 
 [tool.hatch.build.targets.wheel.force-include]
-"schema/pyamlvus_schema.json" = "pyamlvus/schema/pyamlvus_schema.json"
-"src/pyamlvus/py.typed" = "pyamlvus/py.typed"
+"schema/pyms_schema.json" = "pyms/schema/pyms_schema.json"
+"src/pyms/py.typed" = "pyms/py.typed"
 
 [tool.hatch.build.targets.sdist]
 include = [
-    "schema/pyamlvus_schema.json",
-    "src/pyamlvus/py.typed",
+    "schema/pyms_schema.json",
+    "src/pyms/py.typed",
 ]
 
 [project.scripts]
-pyamlvus = "pyamlvus.cli:app"
+pyms = "pyms.cli:app"
 
 [tool.pytest.ini_options]
 minversion = "6.0"
@@ -146,6 +146,6 @@ nb = [
 ]
 
 [tool.ruff.lint.isort]
-known-first-party = ["pyamlvus"]
+known-first-party = ["pyms"]
 combine-as-imports = true
 lines-between-types = 1

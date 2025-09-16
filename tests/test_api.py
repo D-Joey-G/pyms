@@ -7,13 +7,13 @@ import yaml
 
 from pymilvus import CollectionSchema
 
-from pyamlvus.api import (
+from pyms.api import (
     build_collection_from_dict,
     build_collection_from_yaml,
     create_collection_from_dict,
     create_collection_from_yaml,
 )
-from pyamlvus.exceptions import SchemaConversionError
+from pyms.exceptions import SchemaConversionError
 
 
 @pytest.mark.unit

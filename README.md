@@ -1,13 +1,13 @@
 # pyms
 
-pyms (Python Yaml Milvus Schema) is a Python library for managing Milvus schemas through YAML configuration files.
+pyms is a *P*ython library for using *Y*AML to declaritively manage *M*ilvus *s*chemas.
 
 ## Quick Start
 
 **Load and validate schemas from YAML:**
 
 ```python
-from pyamlvus import load_schema, validate_schema_file, create_collection_from_yaml
+from pyms import load_schema, validate_schema_file, create_collection_from_yaml
 
 # Load schema from YAML file
 schema = load_schema("my_schema.yaml")
@@ -107,8 +107,8 @@ YAML Schema → Parser → Validation → CollectionSchema → Milvus
 uv add pyms
 
 # Development installation
-git clone https://github.com/D-Joey-G/pyamlvus
-cd pyamlvus
+git clone https://github.com/D-Joey-G/pyms
+cd pyms
 uv sync --all-groups
 ```
 
@@ -133,7 +133,7 @@ create_collection_from_yaml(
 **Load schema from YAML file:**
 
 ```python
-from pyamlvus import load_schema
+from pyms import load_schema
 
 schema = load_schema("schema.yaml")
 ```
@@ -141,7 +141,7 @@ schema = load_schema("schema.yaml")
 **Load schema dictionary:**
 
 ```python
-from pyamlvus import load_schema_dict
+from pyms import load_schema_dict
 
 schema_dict = load_schema_dict("schema.yaml")
 ```
@@ -149,7 +149,7 @@ schema_dict = load_schema_dict("schema.yaml")
 **Validate schema file:**
 
 ```python
-from pyamlvus import validate_schema_file
+from pyms import validate_schema_file
 
 result = validate_schema_file("schema.yaml")
 if result.has_errors():
@@ -160,7 +160,7 @@ if result.has_errors():
 ### Schema Loading & Parsing
 
 ```python
-from pyamlvus import SchemaLoader
+from pyms import SchemaLoader
 
 loader = SchemaLoader("schema.yaml")
 print(f"Collection: {loader.name}")
@@ -174,7 +174,7 @@ schema_dict = loader.to_dict()
 ### Schema Building
 
 ```python
-from pyamlvus import SchemaBuilder
+from pyms import SchemaBuilder
 
 builder = SchemaBuilder(schema_dict)
 collection_schema = builder.build()
@@ -238,7 +238,7 @@ pymilvus:
 ```
 
 Supported keys: `min_version`, `max_version`, and `version` (aliases `require` / `exact_version`).
-If the current client falls outside the declared range, pyamlvus raises a clear error before building the schema.
+If the current client falls outside the declared range, pyms raises a clear error before building the schema.
 
 ## Text Match Support
 
@@ -276,7 +276,7 @@ Check out the `examples/` directory:
 ### Project Structure
 
 ```text
-src/pyamlvus/
+src/pyms/
 ├── __init__.py          # Public API exports
 ├── api.py               # High-level convenience functions
 ├── parser.py            # YAML parsing and loading
@@ -328,17 +328,17 @@ This project is licensed under the MIT License - see LICENSE.md details.
 
 ### JSON Schema for YAML Validation
 
-pyamlvus includes a JSON Schema file for IDE support and YAML validation. For VS Code, add the YAML extension from Red Hat, then add this to the top of your YAML schema files:
+pyms includes a JSON Schema file for IDE support and YAML validation. For VS Code, add the YAML extension from Red Hat, then add this to the top of your YAML schema files:
 
 ```yaml
-# yaml-language-server: $schema=https://raw.githubusercontent.com/D-Joey-G/pyamlvus/main/schema/pyamlvus_schema.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/D-Joey-G/pyms/main/schema/pyms_schema.json
 
 name: "my_collection"
 fields:
   # Your IDE will now provide autocompletion and validation!
 ```
 
-Or configure your IDE to automatically validate `.yaml` files in your project using the schema at `schema/pyamlvus_schema.json`.
+Or configure your IDE to automatically validate `.yaml` files in your project using the schema at `schema/pyms_schema.json`.
 
 **Benefits:**
 
@@ -354,21 +354,21 @@ Add to your `.vscode/settings.json`:
 ```json
 {
   "yaml.schemas": {
-    "./schema/pyamlvus_schema.json": ["*_schema.yaml", "**/schemas/*.yaml"]
+    "./schema/pyms_schema.json": ["*_schema.yaml", "**/schemas/*.yaml"]
   }
 }
 ```
 
 ## CLI Tool
 
-pyamlvus includes a command-line tool for schema validation and management:
+pyms includes a command-line tool for schema validation and management:
 
 ```bash
 # Validate a schema file
-pyamlvus validate my_schema.yaml
+pyms validate my_schema.yaml
 
 # Convert YAML to CollectionSchema (future feature)
-pyamlvus convert my_schema.yaml
+pyms convert my_schema.yaml
 ```
 
 **Status**: **Core Library** - Focused on YAML schema definition, validation, and CollectionSchema building for PyMilvus integration.

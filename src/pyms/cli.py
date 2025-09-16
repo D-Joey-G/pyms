@@ -1,5 +1,5 @@
 """
-Command-line interface for pyamlvus.
+Command-line interface for pyms.
 
 Provides tools for validating and working with Milvus YAML schema files.
 """
@@ -11,11 +11,11 @@ import typer
 from rich.console import Console
 from rich.table import Table
 
-from pyamlvus import SchemaLoader, validate_schema_file
-from pyamlvus.exceptions import SchemaParseError
+from pyms import SchemaLoader, validate_schema_file
+from pyms.exceptions import SchemaParseError
 
 app = typer.Typer(
-    name="pyamlvus",
+    name="pyms",
     help="CLI tools for Milvus YAML schema management",
     add_completion=False,
 )
