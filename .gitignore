@@ -10,4 +10,4 @@ wheels/
 .DS_Store
 .venv
 .env
-justfile
+.uv-cache
