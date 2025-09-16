@@ -103,10 +103,3 @@ class ValidationResult(Sequence[str]):
         """Return messages as prefixed strings for backward compatibility."""
 
         return [msg.as_prefixed() for msg in self.messages]
-
-    @classmethod
-    def merge(cls, *results: ValidationResult) -> ValidationResult:
-        merged = cls()
-        for result in results:
-            merged.extend(result)
-        return merged
