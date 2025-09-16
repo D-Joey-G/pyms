@@ -5,6 +5,8 @@ from pathlib import Path
 
 # High-level API
 from .api import (
+    build_collection_from_dict,
+    build_collection_from_yaml,
     create_collection_from_dict,
     create_collection_from_yaml,
     load_schema,
@@ -27,6 +29,8 @@ __all__ = [
     "load_schema",
     "load_schema_dict",
     "validate_schema_file",
+    "build_collection_from_yaml",
+    "build_collection_from_dict",
     "create_collection_from_yaml",
     "create_collection_from_dict",
 ]

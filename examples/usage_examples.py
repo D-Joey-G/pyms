@@ -89,8 +89,8 @@ def example_with_milvus():
     # Load schema
     schema = load_schema(schema_file)
 
-    # Alternative: Use the convenience function
-    # schema = create_collection_from_yaml(schema_file)
+    # Alternative: Use the convenience builder function
+    # schema = build_collection_from_yaml(schema_file)
 
     print(f"Schema loaded: {schema.description}")
 

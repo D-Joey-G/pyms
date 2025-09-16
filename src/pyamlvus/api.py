@@ -5,10 +5,11 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from pymilvus import CollectionSchema
+    from pymilvus import CollectionSchema, MilvusClient
 
 
 from .builders.schema import SchemaBuilder
+from .exceptions import SchemaConversionError
 from .parser import SchemaLoader
 
 
@@ -79,11 +80,11 @@ def validate_schema_file(file_path: str | Path) -> list[str]:
     return validate_schema(file_path)
 
 
-def create_collection_from_yaml(
+def build_collection_from_yaml(
     file_path: str | Path,
     **kwargs: Any,
 ) -> "CollectionSchema":
-    """Create a CollectionSchema from a YAML schema file.
+    """Build a CollectionSchema from a YAML schema file.
 
     Args:
         file_path: Path to the YAML schema file
@@ -100,11 +101,11 @@ def create_collection_from_yaml(
     return load_schema(file_path)
 
 
-def create_collection_from_dict(
+def build_collection_from_dict(
     schema_dict: dict[str, Any],
     **kwargs: Any,
 ) -> "CollectionSchema":
-    """Create a CollectionSchema from a schema dictionary.
+    """Build a CollectionSchema from a schema dictionary.
 
     Args:
         schema_dict: Schema dictionary (from load_schema_dict or manual creation)
@@ -119,3 +120,51 @@ def create_collection_from_dict(
     """
     builder = SchemaBuilder(schema_dict)
     return builder.build()
+
+
+def create_collection_from_yaml(
+    file_path: str | Path,
+    client: "MilvusClient",
+    **kwargs: Any,
+) -> Any:
+    """Build a schema from YAML and create the collection via MilvusClient.
+
+    Args:
+        file_path: Path to the YAML schema file
+        client: MilvusClient instance used to create the collection
+        **kwargs: Additional arguments (ignored for compatibility)
+
+    Returns:
+        Result of ``MilvusClient.create_collection``
+    """
+    loader = SchemaLoader(file_path)
+    schema_dict = loader.to_dict()
+    collection_name = loader.name
+
+    schema = build_collection_from_dict(schema_dict)
+    return client.create_collection(collection_name=collection_name, schema=schema)
+
+
+def create_collection_from_dict(
+    schema_dict: dict[str, Any],
+    client: "MilvusClient",
+    **kwargs: Any,
+) -> Any:
+    """Build a schema from a dictionary and create the collection via MilvusClient.
+
+    Args:
+        schema_dict: Schema dictionary (from load_schema_dict or manual creation)
+        client: MilvusClient instance used to create the collection
+        **kwargs: Additional arguments (ignored for compatibility)
+
+    Returns:
+        Result of ``MilvusClient.create_collection``
+    """
+    collection_name = schema_dict.get("name")
+    if not isinstance(collection_name, str):
+        raise SchemaConversionError(
+            "Schema dictionary must include a string 'name' field"
+        )
+
+    schema = build_collection_from_dict(schema_dict)
+    return client.create_collection(collection_name=collection_name, schema=schema)
