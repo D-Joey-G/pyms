@@ -80,15 +80,11 @@ def validate_schema_file(file_path: str | Path) -> list[str]:
     return validate_schema(file_path)
 
 
-def build_collection_from_yaml(
-    file_path: str | Path,
-    **kwargs: Any,
-) -> "CollectionSchema":
+def build_collection_from_yaml(file_path: str | Path) -> "CollectionSchema":
     """Build a CollectionSchema from a YAML schema file.
 
     Args:
         file_path: Path to the YAML schema file
-        **kwargs: Additional arguments (ignored for compatibility)
 
     Returns:
         PyMilvus CollectionSchema object
@@ -101,15 +97,11 @@ def build_collection_from_yaml(
     return load_schema(file_path)
 
 
-def build_collection_from_dict(
-    schema_dict: dict[str, Any],
-    **kwargs: Any,
-) -> "CollectionSchema":
+def build_collection_from_dict(schema_dict: dict[str, Any]) -> "CollectionSchema":
     """Build a CollectionSchema from a schema dictionary.
 
     Args:
         schema_dict: Schema dictionary (from load_schema_dict or manual creation)
-        **kwargs: Additional arguments (ignored for compatibility)
 
     Returns:
         PyMilvus CollectionSchema object
@@ -125,14 +117,12 @@ def build_collection_from_dict(
 def create_collection_from_yaml(
     file_path: str | Path,
     client: "MilvusClient",
-    **kwargs: Any,
 ) -> Any:
     """Build a schema from YAML and create the collection via MilvusClient.
 
     Args:
         file_path: Path to the YAML schema file
         client: MilvusClient instance used to create the collection
-        **kwargs: Additional arguments (ignored for compatibility)
 
     Returns:
         Result of ``MilvusClient.create_collection``
@@ -148,14 +138,12 @@ def create_collection_from_yaml(
 def create_collection_from_dict(
     schema_dict: dict[str, Any],
     client: "MilvusClient",
-    **kwargs: Any,
 ) -> Any:
     """Build a schema from a dictionary and create the collection via MilvusClient.
 
     Args:
         schema_dict: Schema dictionary (from load_schema_dict or manual creation)
         client: MilvusClient instance used to create the collection
-        **kwargs: Additional arguments (ignored for compatibility)
 
     Returns:
         Result of ``MilvusClient.create_collection``
