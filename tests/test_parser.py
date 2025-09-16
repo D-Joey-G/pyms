@@ -131,6 +131,17 @@ class TestSchemaLoader:
             _ = loader.fields
 
     @pytest.mark.error_cases
+    def test_invalid_description_type(self, create_temp_yaml):
+        """Test error handling for non-string description values."""
+        yaml_file = create_temp_yaml("name: test\ndescription: {}\nfields: []")
+        loader = SchemaLoader(yaml_file)
+
+        with pytest.raises(
+            SchemaParseError, match="Collection description must be a string"
+        ):
+            _ = loader.description
+
+    @pytest.mark.error_cases
     def test_invalid_fields_type(self, create_temp_yaml):
         """Test error handling for invalid fields type."""
         yaml_file = create_temp_yaml("name: test\nfields: 'not a list'")

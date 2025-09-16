@@ -173,7 +173,18 @@ class SchemaLoader:
             Collection description (empty string if not specified)
         """
         schema = self.load()
-        return schema.get("description", "")
+        description = schema.get("description", "")
+
+        if description is None:
+            return ""
+
+        if not isinstance(description, str):
+            raise SchemaParseError(
+                "Collection description must be a string",
+                file_path=str(self.file_path),
+            )
+
+        return description
 
     @property
     def alias(self) -> str:

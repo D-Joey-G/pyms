@@ -14,6 +14,30 @@ from rich.table import Table
 from pyamlvus import SchemaLoader, validate_schema_file
 from pyamlvus.exceptions import SchemaParseError
 
+
+def _split_messages(messages: list[str]) -> tuple[list[str], list[str], list[str]]:
+    """Group validation messages by severity based on a simple prefix convention."""
+
+    errors: list[str] = []
+    warnings: list[str] = []
+    infos: list[str] = []
+
+    for message in messages:
+        normalized = message.strip()
+        prefix = normalized.upper()
+
+        if prefix.startswith("WARNING"):
+            warnings.append(normalized)
+        elif prefix.startswith("INFO"):
+            infos.append(normalized)
+        elif prefix.startswith("ERROR"):
+            errors.append(normalized)
+        else:
+            errors.append(normalized)
+
+    return errors, warnings, infos
+
+
 app = typer.Typer(
     name="pyamlvus",
     help="CLI tools for Milvus YAML schema management",
@@ -36,9 +60,9 @@ def validate(
     try:
         console.print(f"Validating [blue]{schema_file}[/blue]...")
 
-        errors = validate_schema_file(schema_file)
+        messages = validate_schema_file(schema_file)
 
-        if not errors:
+        if not messages:
             console.print("[green]✓ Schema is valid![/green]")
 
             if verbose:
@@ -55,11 +79,7 @@ def validate(
                     console.print(f"  Settings: {list(loader.settings.keys())}")
 
         else:
-            # Separate errors and warnings
-            actual_errors = [
-                e for e in errors if "ERROR" in e or not e.startswith("WARNING")
-            ]
-            warnings = [e for e in errors if e.startswith("WARNING")]
+            actual_errors, warnings, infos = _split_messages(messages)
 
             if actual_errors:
                 console.print(f"[red]✗ Schema has {len(actual_errors)} error(s):[/red]")
@@ -72,6 +92,13 @@ def validate(
                 )
                 for warning in warnings:
                     console.print(f"  [yellow]• {warning}[/yellow]")
+
+            if infos:
+                console.print(
+                    f"[cyan]i Schema has {len(infos)} info message(s):[/cyan]"
+                )
+                for info in infos:
+                    console.print(f"  [cyan]• {info}[/cyan]")
 
             if actual_errors:
                 raise typer.Exit(1)
